@@ -1,0 +1,40 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 40px;
+    background-color: #f9f9f9;
+    color: #222;
+}
+
+#scene-container {
+    border: 1px solid #ccc;
+    padding: 20px;
+    min-height: 500px;
+    background: white;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+#annotation {
+    position: absolute;
+    bottom: 15px;
+    left: 20px;
+    font-size: 14px;
+    color: #555;
+    max-width: 90%;
+}
+
+button {
+    background-color: #007acc;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    margin-right: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+button:disabled {
+    background-color: #999;
+    cursor: default;
+}
