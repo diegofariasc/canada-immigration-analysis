@@ -10,23 +10,89 @@
 </head>
 
 <body>
-    <h1>Immigration in Canada: A Narrative Analysis</h1>
-
-    <div id="scene-container">
-        <div id="annotation"></div>
+    <div id="background">
+        <div id="image-container">
+            <div id="intro-content">
+                <div>
+                    <div id="intro-title-container">
+                        <img id="intro-top-img" src="images/introduction-top.svg"></img>
+                        <h1>Welcome to Canada?</h1>
+                        <h2>A story of opportunity and obstacles</h2>
+                    </div>
+                    <div id="intro-text">
+                        <p>
+                            Canada has long stood as a beacon for immigrants worldwide, ranking consistently among the
+                            top
+                            global
+                            destinations for migration. According to the <strong>United Nations’ 2022 International
+                                Migration
+                                Report</strong>, Canada welcomed over <strong>450,000 new permanent residents</strong>
+                            in
+                            2021,
+                            reflecting
+                            its open immigration policies and economic opportunities.
+                        </p>
+                        <p>
+                            Research from <strong>Statistics Canada (2023)</strong> highlights that immigrants
+                            contribute
+                            significantly
+                            to Canada's
+                            economic growth, innovation, and demographic sustainability, especially in a context of an
+                            aging
+                            native-born
+                            population. However, successful integration involves navigating complex challenges in
+                            housing
+                            affordability,
+                            labor market access, and healthcare availability.
+                        </p>
+                        <p>
+                            This narrative visualization aims to shed light on these multifaceted experiences by
+                            exploring
+                            immigration trends, <strong> market pressures, affordability challenges</strong> impacting
+                            newcomers,
+                            <strong>unemployment rates</strong> and <strong>healthcare needs and gaps</strong> affecting
+                            immigrant communities.
+                        </p>
+                    </div>
+                    <div id="start-btn-container">
+                        <button id="start-btn">▶︎ Start narrative</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer id="page-footer">
+            <p>Narrative visualization project for CS416: Data Visualization - Diego Farias Castro</p>
+        </footer>
     </div>
 
-    <div id="controls">
-        <button id="prev-btn" disabled>Previous</button>
-        <button id="next-btn">Next</button>
+
+    <!-- Main visualization container -->
+    <div id="visualization-container" style="display:none;">
+        <div id="scene-container">
+            <div id="annotation"></div>
+        </div>
+
+        <div id="controls">
+            <button id="prev-btn" disabled>Previous</button>
+            <button id="next-btn">Next</button>
+        </div>
     </div>
 
     <script src="js/scene1.js"></script>
     <script src="js/scene2.js"></script>
     <script src="js/scene3.js"></script>
     <script src="js/scene4.js"></script>
-    <script src="js/scene5.js"></script>
     <script src="js/main.js"></script>
+
+    <script>
+        document.getElementById('start-btn').addEventListener('click', () => {
+            document.getElementById('image-container').style.display = 'none';
+            document.getElementById('visualization-container').style.display = 'block';
+            if (typeof loadScene === 'function' && window.allData) {
+                loadScene(0, window.allData);
+            }
+        });
+    </script>
 </body>
 
 </html>

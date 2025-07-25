@@ -71,7 +71,7 @@ Promise.all([
     });
 
     nextBtn.on("click", () => {
-        if (currentSceneIndex < 4) {
+        if (currentSceneIndex < 3) {
             loadScene(currentSceneIndex + 1, allData);
         }
     });
