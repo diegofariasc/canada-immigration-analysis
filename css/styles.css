@@ -87,7 +87,14 @@ body {
     overflow: hidden;
     opacity: 0;
     transform: translateY(15px);
-    animation: contentFadeSlideIn 1s ease forwards 0.3s;
+}
+
+.content-wrapper.fade-out-left {
+    animation: contentFadeSlideOutLeft 0.5s ease forwards;
+}
+
+.content-wrapper.slide-wrapper {
+    animation: contentFadeSlideInRight 0.5s ease forwards;
 }
 
 .content-wrapper>div {
@@ -180,6 +187,7 @@ button:disabled {
     max-width: 700px;
     max-height: 90vh;
     width: 90%;
+    animation: contentFadeSlideIn 1s ease forwards 0.3s;
 }
 
 #intro-content-wrapper h1 {
@@ -252,6 +260,21 @@ button:disabled {
     padding: 0 20px;
 }
 
+.info-footer-wrapper {
+    min-height: fit-content;
+    font-size: 0.8rem;
+    width: 100%;
+}
+
+.info-footer-text {
+    margin-top: 0;
+}
+
+.info-footer-sources {
+    padding-inline-start: 1rem;
+    list-style-type: square;
+}
+
 @keyframes contentFadeSlideIn {
     to {
         opacity: 1;
@@ -268,5 +291,30 @@ button:disabled {
     100% {
         opacity: 1;
         transform: scale(1);
+    }
+}
+
+@keyframes contentFadeSlideOutLeft {
+    0% {
+        opacity: 1;
+        transform: translateX(0) translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(-30%) translateY(0);
+    }
+}
+
+
+@keyframes contentFadeSlideInRight {
+    0% {
+        opacity: 0;
+        transform: translateX(30%) translateY(0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0) translateY(0);
     }
 }

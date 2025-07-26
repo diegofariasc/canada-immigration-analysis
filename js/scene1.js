@@ -51,17 +51,24 @@ function drawChart() {
 
     container.select("svg")?.remove();
 
-    const margin = { top: 60, right: 40, bottom: 80, left: 80 };
+    const margin = { top: 0, right: 40, bottom: 60, left: 80 };
     const containerNode = container.node();
     const containerWidth = containerNode.clientWidth;
-    const containerHeight = containerNode.clientHeight;
-
     const isWide = containerWidth > 600;
+
+    insertFooter(container, {
+        textHtml: isWide
+            ? "<strong>Hover</strong> over the bar chart to see details for each year or <strong>click</strong> a bar to view the immigrant distribution by province for that year"
+            : "<strong>Hover</strong> to see details for each year. Province-level data is not available on small screens.",
+        sources: ["Statistics Canada, <i>Estimates of demographic growth components (annual)</i>"]
+    });
+
+    const containerHeight = containerNode.clientHeight;
     const barWidth = isWide
-        ? (containerWidth * 0.6 - margin.left - margin.right - 60)
+        ? (containerWidth * 0.6 - margin.left - margin.right - 40)
         : (containerWidth - margin.left - margin.right);
     const barHeight = containerHeight - margin.top - margin.bottom;
-    const pieRadius = Math.min(containerHeight, containerWidth * 0.3) / 3;
+    const pieRadius = Math.min(containerHeight, (containerWidth - 70) * 0.3) / 3;
 
     const svg = container.append("svg")
         .attr("width", containerWidth)
@@ -71,17 +78,45 @@ function drawChart() {
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
     const pieGroup = svg.append("g")
-        .attr("transform", `translate(${isWide ? (barWidth + margin.left + pieRadius * 1.2 + 150) : containerWidth / 2},${isWide ? (margin.top + barHeight / 2) : (barHeight + margin.top + margin.bottom + pieRadius)})`);
+        .attr("transform", `translate(${isWide ? (barWidth + margin.left + pieRadius * 1.2 + 130) : containerWidth / 2},${isWide ? (margin.top + barHeight / 2) : (barHeight + margin.top + margin.bottom + pieRadius)})`);
 
-    const x = d3.scaleBand().domain(data.map(d => d.Year)).range([0, barWidth]).padding(0.1);
-    const y = d3.scaleLinear().domain([0, d3.max(data, d => d.totalImmigrants) * 1.1]).range([barHeight, 0]);
+    const x = d3.scaleBand()
+        .domain(data.map(d => d.Year))
+        .range([0, barWidth])
+        .padding(0.1);
+
+    const y = d3.scaleLinear()
+        .domain([0, d3.max(data, d => d.totalImmigrants) * 1.1])
+        .range([barHeight, 0]);
 
     barGroup.append("g")
         .attr("transform", `translate(0,${barHeight})`)
         .call(d3.axisBottom(x).tickValues(x.domain().filter((d, i) => i % 5 === 0)))
-        .selectAll("text").attr("transform", "rotate(-45)").style("text-anchor", "end");
+        .selectAll("text")
+        .attr("transform", "rotate(-45)")
+        .style("text-anchor", "end");
 
-    barGroup.append("g").call(d3.axisLeft(y).tickValues(d3.range(0, d3.max(data, d => d.totalImmigrants) * 1.1 + 1, 100000)).tickFormat(d => (d / 1000).toLocaleString()));
+    const yAxisGroup = barGroup.append("g")
+        .call(d3.axisLeft(y).tickValues(d3.range(0, d3.max(data, d => d.totalImmigrants) * 1.1 + 1, 100000)).tickFormat(d => `${(d / 1000).toLocaleString()}k`));
+
+    barGroup.append("text")
+        .attr("x", barWidth / 2)
+        .attr("y", barHeight + 50)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "11px")
+        .attr("fill", "#333")
+        .text("Year");
+
+    const yAxisBBox = yAxisGroup.node().getBBox();
+
+    barGroup.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -barHeight / 2)
+        .attr("y", -yAxisBBox.width - 10)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "11px")
+        .attr("fill", "#333")
+        .text("Total Immigrants");
 
     const barsGroup = barGroup.append("g");
 
@@ -298,7 +333,6 @@ function updatePieChart(pieGroup, pieRadius) {
             .style("text-anchor", d => ((d.endAngle + d.startAngle) / 2 < Math.PI ? "start" : "end"))
             .text(d => d.data.province);
     } else {
-        // Si no ha renderizado escena 1, poner texto sin animación (sin transición)
         labelsGroup.selectAll("text")
             .data(arcs, d => d.data.province)
             .join(

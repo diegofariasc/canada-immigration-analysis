@@ -64,7 +64,10 @@ Promise.all([
     console.error("Error loading data:", err);
 });
 
-document.getElementById('start-btn').addEventListener('click', () => {
+document.getElementById('start-btn').addEventListener('click', async () => {
+    const el = document.querySelector('.content-wrapper');
+    el.classList.add('fade-out-left')
+
     document.getElementById('intro-content-wrapper').style.display = 'none';
     document.getElementById('visualization-content-wrapper').style.display = 'flex';
 
