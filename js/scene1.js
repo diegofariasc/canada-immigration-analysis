@@ -39,12 +39,12 @@ function renderScene1(container, annotation, allData) {
     provincesGlobal = provinces;
     selectedYear = data[data.length - 1].Year;
 
-    drawChart();
+    drawScene1Chart();
 
-    window.addEventListener("resize", drawChart);
+    window.addEventListener("resize", drawScene1Chart);
 }
 
-function drawChart() {
+function drawScene1Chart() {
     const container = containerGlobal;
     const data = dataGlobal;
     const annotation = annotationGlobal;
