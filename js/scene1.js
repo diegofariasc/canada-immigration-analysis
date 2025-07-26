@@ -103,7 +103,9 @@ function drawChart() {
         .attr("x", barWidth / 2)
         .attr("y", barHeight + 50)
         .attr("text-anchor", "middle")
-        .attr("font-size", "11px")
+        .attr("font-size", "12px")
+        .attr("font-family", "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif")
+        .attr("font-weight", 500)
         .attr("fill", "#333")
         .text("Year");
 
@@ -112,9 +114,11 @@ function drawChart() {
     barGroup.append("text")
         .attr("transform", "rotate(-90)")
         .attr("x", -barHeight / 2)
-        .attr("y", -yAxisBBox.width - 10)
+        .attr("y", -yAxisBBox.width - 20)
         .attr("text-anchor", "middle")
-        .attr("font-size", "11px")
+        .attr("font-size", "12px")
+        .attr("font-family", "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif")
+        .attr("font-weight", 500)
         .attr("fill", "#333")
         .text("Total Immigrants");
 

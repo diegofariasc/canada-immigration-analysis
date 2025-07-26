@@ -8,7 +8,7 @@ body {
     align-items: center;
     box-sizing: border-box;
     flex-direction: column;
-    min-width: 600px;
+    min-width: 700px;
     min-height: 750px;
 }
 
@@ -205,12 +205,54 @@ button:disabled {
 
 #scene-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row-reverse;
     height: 100%;
     width: 100%;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+
+#province-selector {
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: calc(100% - 30px);
+    min-width: 280px;
+    max-width: 280px;
+    background: #fafafa;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: sans-serif;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    user-select: none;
+}
+
+#province-selector-title {
+    top: 0;
+    position: sticky;
+    background: #fafafa;
+    padding: 10px 10px 5px 10px;
+    width: 100%;
+    display: flex;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+}
+
+#province-selector-footer {
+    bottom: 0;
+    position: sticky;
+    background: #fafafa;
+    padding: 5px 10px 10px 10px;
+    width: 100%;
+    display: flex;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+}
+
+#province-selector>label {
+    padding: 0 10px;
 }
 
 #annotation {
