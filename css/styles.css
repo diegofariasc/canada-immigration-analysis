@@ -8,6 +8,8 @@ body {
     align-items: center;
     box-sizing: border-box;
     flex-direction: column;
+    min-width: 600px;
+    min-height: 750px;
 }
 
 #background {
@@ -197,8 +199,10 @@ button:disabled {
     display: flex;
     flex-direction: column;
     height: 100%;
+    width: 100%;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
 }
 
 #annotation {
@@ -237,7 +241,7 @@ button:disabled {
     border: none;
 }
 
-#info-wrapper {
+.info-wrapper {
     display: flex;
     flex-direction: column;
     min-height: fit-content;
