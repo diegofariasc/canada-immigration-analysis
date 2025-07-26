@@ -70,9 +70,7 @@ body {
     padding: 0 40px;
 }
 
-#intro-content {
-    max-width: 700px;
-    width: 90%;
+.content-wrapper {
     background-color: rgba(255, 255, 255, 0.9);
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
@@ -81,7 +79,6 @@ body {
     color: #333;
     z-index: 2;
     overflow-x: hidden;
-    max-height: 90vh;
     display: flex;
     align-items: center;
     flex-direction: column;
@@ -91,33 +88,32 @@ body {
     animation: contentFadeSlideIn 1s ease forwards 0.3s;
 }
 
-#intro-content>div {
+.content-wrapper>div {
     overflow-y: auto;
 }
 
-#intro-content h1 {
+.content-wrapper h1 {
     font-size: 2.5em;
     color: #1a237e;
     text-align: center;
     line-height: 1.2;
     font-weight: 700;
     margin: 0;
-    padding: 0 40px;
 }
 
-#intro-content h2 {
+.content-wrapper h2 {
     margin: 0;
     text-align: center;
     padding: 0 40px;
     color: #007acc;
 }
 
-#intro-content p {
+.content-wrapper p {
     margin-bottom: 15px;
     font-size: 0.8rem;
 }
 
-#intro-content strong {
+.content-wrapper strong {
     color: #1a237e;
     font-weight: 600;
 }
@@ -130,6 +126,8 @@ body {
     z-index: 10;
     box-sizing: border-box;
     padding: 20px 0;
+    display: flex;
+    justify-content: center;
 }
 
 #start-btn-container::before {
@@ -158,7 +156,6 @@ button {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     transition: background-color 0.3s ease, transform 0.2s ease;
     display: block;
-    margin: 0 auto;
     letter-spacing: 0.5px;
 }
 
@@ -177,28 +174,31 @@ button:disabled {
     transform: none;
 }
 
-#visualization-container {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-    background-color: #f0f2f5;
+#intro-content-wrapper {
+    max-width: 700px;
+    max-height: 90vh;
+    width: 90%;
+}
+
+#intro-content-wrapper h1 {
+    padding: 0 40px;
+}
+
+#visualization-content-wrapper {
+    height: calc(90% - 40px);
+    width: calc(95% - 40px);
+    display: none;
+    align-items: flex-start;
     padding: 20px;
-    box-sizing: border-box;
+    gap: 20px;
 }
 
 #scene-container {
-    flex-grow: 1;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    background: white;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     display: flex;
-    justify-content: left;
+    flex-direction: column;
+    height: 100%;
     align-items: center;
-    min-height: 400px;
-    overflow: hidden;
+    justify-content: center;
 }
 
 #annotation {
@@ -217,9 +217,11 @@ button:disabled {
 
 #controls {
     display: flex;
-    justify-content: center;
+    justify-content: right;
     gap: 15px;
-    padding-bottom: 10px;
+    width: 100%;
+    min-height: fit-content;
+    padding-top: 5px;
 }
 
 #page-footer {
@@ -233,6 +235,17 @@ button:disabled {
     letter-spacing: 0.8px;
     user-select: none;
     border: none;
+}
+
+#info-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: fit-content;
+    align-items: flex-start;
+}
+
+#page-footer p {
+    padding: 0 20px;
 }
 
 @keyframes contentFadeSlideIn {

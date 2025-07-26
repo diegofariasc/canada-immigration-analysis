@@ -1,4 +1,5 @@
 let currentSceneIndex = 0;
+let savedAllData = null;
 
 const container = d3.select("#scene-container");
 const annotation = d3.select("#annotation");
@@ -21,10 +22,9 @@ function loadScene(index, allData) {
     }
 
     prevBtn.property("disabled", currentSceneIndex === 0);
-    nextBtn.property("disabled", currentSceneIndex === 4);
+    nextBtn.property("disabled", currentSceneIndex === 3);
 }
 
-// Load all data first
 Promise.all([
     d3.csv("data/new-immigrants.csv"),
     d3.csv("data/house-prices.csv"),
@@ -32,7 +32,6 @@ Promise.all([
     d3.csv("data/health-needs.csv"),
     d3.json("data/canada-provinces.json")
 ]).then(([immigrationData, housingData, unemploymentData, healthData, provinces]) => {
-
 
     immigrationData.forEach(d => {
         d.year = +d.year;
@@ -53,7 +52,7 @@ Promise.all([
         d["unmet needs percentage"] = +d["unmet needs percentage"];
     });
 
-    const allData = {
+    savedAllData = {
         immigrationData,
         housingData,
         unemploymentData,
@@ -61,21 +60,29 @@ Promise.all([
         provinces
     };
 
-    loadScene(currentSceneIndex, allData);
-
-    // Button listeners
-    prevBtn.on("click", () => {
-        if (currentSceneIndex > 0) {
-            loadScene(currentSceneIndex - 1, allData);
-        }
-    });
-
-    nextBtn.on("click", () => {
-        if (currentSceneIndex < 3) {
-            loadScene(currentSceneIndex + 1, allData);
-        }
-    });
 }).catch(err => {
     console.error("Error loading data:", err);
 });
 
+document.getElementById('start-btn').addEventListener('click', () => {
+    document.getElementById('intro-content-wrapper').style.display = 'none';
+    document.getElementById('visualization-content-wrapper').style.display = 'flex';
+
+    requestAnimationFrame(() => {
+        if (typeof loadScene === 'function' && savedAllData) {
+            loadScene(0, savedAllData);
+        }
+    });
+});
+
+prevBtn.on("click", () => {
+    if (currentSceneIndex > 0) {
+        loadScene(currentSceneIndex - 1, savedAllData);
+    }
+});
+
+nextBtn.on("click", () => {
+    if (currentSceneIndex < 3) {
+        loadScene(currentSceneIndex + 1, savedAllData);
+    }
+});

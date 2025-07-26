@@ -7,9 +7,14 @@ function renderScene1(container, annotation, allData) {
         "Yukon", "Northwest Territories", "Nunavut"
     ];
 
-    container.selectAll("*").remove(); // clear container
+    container.selectAll("*").remove();
 
-    container.insert("h2", ":first-child").text("Growing Immigration in Canada");
+    insertTitleAndDescription(
+        container,
+        "Growing Immigration in Canada",
+        "Canada has consistently welcomed a growing number of immigrants since 1991, with a notable peak in <strong>2021 and 2022</strong>. The <em>Express Entry</em> system, introduced in 2015, streamlined skilled worker applications, while additional pathways—such as one that granted permanent status to temporary residents—helped attract and retain talent already in the country. This upward trend, visible in the bar chart, reflects the government's broader commitment to immigration as a key driver of economic growth"
+    );
+
 
     const margin = { top: 60, right: 40, bottom: 80, left: 80 };
     const width = 900 - margin.left - margin.right;
@@ -23,7 +28,6 @@ function renderScene1(container, annotation, allData) {
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // Tooltip setup
     const tooltip = container.append("div")
         .style("position", "absolute")
         .style("pointer-events", "none")
@@ -34,23 +38,19 @@ function renderScene1(container, annotation, allData) {
         .style("font-size", "12px")
         .style("visibility", "hidden");
 
-    // Calculate total immigrants per year
     data.forEach(d => {
         d.totalImmigrants = provinces.reduce((sum, p) => sum + (+d[p] || 0), 0);
     });
 
-    // X scale for bars (years)
     const x = d3.scaleBand()
         .domain(data.map(d => d.Year))
         .range([0, barWidth])
         .padding(0.1);
 
-    // Y scale for bars (immigrants)
     const y = d3.scaleLinear()
         .domain([0, d3.max(data, d => d.totalImmigrants) * 1.1])
         .range([height, 0]);
 
-    // X and Y axes
     svg.append("g")
         .attr("transform", `translate(0,${height})`)
         .call(d3.axisBottom(x).tickValues(x.domain().filter((d, i) => i % 5 === 0)))
@@ -59,17 +59,15 @@ function renderScene1(container, annotation, allData) {
         .style("text-anchor", "end");
 
     svg.append("g")
-        .call(d3.axisLeft(y)
-            .tickFormat(d => (d / 1000).toLocaleString()));
+        .call(d3.axisLeft(y).tickFormat(d => (d / 1000).toLocaleString()));
 
     const barsGroup = svg.append("g");
 
     let selectedYear = data[data.length - 1].Year;
 
-    const barColor = "#555555"; // dark gray
-    const barSelectedColor = "#f57c00"; // orange
+    const barColor = "#555555";
+    const barSelectedColor = "#f57c00";
 
-    // Draw bars with hover and click events
     barsGroup.selectAll(".bar")
         .data(data)
         .enter()
@@ -113,7 +111,6 @@ function renderScene1(container, annotation, allData) {
             .attr("fill", d => d.Year === selectedYear ? barSelectedColor : barColor);
     }
 
-    // Axis labels
     svg.append("text")
         .attr("x", barWidth / 2)
         .attr("y", height + 65)
@@ -129,7 +126,6 @@ function renderScene1(container, annotation, allData) {
         .attr("font-size", "14px")
         .text("New immigrants (thousands)");
 
-    // Trendline calculation
     const xVals = data.map(d => d.Year);
     const yVals = data.map(d => d.totalImmigrants);
     const n = data.length;
@@ -151,7 +147,7 @@ function renderScene1(container, annotation, allData) {
     const trendPath = svg.append("path")
         .datum(trendData)
         .attr("fill", "none")
-        .attr("stroke", "#2196f3")  // blue for distinction
+        .attr("stroke", "#2196f3")
         .attr("stroke-width", 2)
         .attr("stroke-dasharray", "5,5")
         .attr("d", trendLine);
@@ -166,7 +162,6 @@ function renderScene1(container, annotation, allData) {
         .ease(d3.easeCubicInOut)
         .attr("stroke-dashoffset", 0);
 
-    // Trendline legend
     svg.append("rect")
         .attr("x", barWidth - 130)
         .attr("y", -45)
@@ -182,7 +177,6 @@ function renderScene1(container, annotation, allData) {
         .attr("font-size", "12px")
         .text("Trendline (growth)");
 
-    // Instruction text
     svg.append("text")
         .attr("x", barWidth / 2)
         .attr("y", -20)
@@ -191,13 +185,11 @@ function renderScene1(container, annotation, allData) {
         .attr("fill", "#333")
         .text("Select a year in the bar chart to see immigration distribution by province");
 
-    // Pie chart group
     const pieGroup = svg.append("g")
         .attr("transform", `translate(${pieX},${height / 2})`);
 
     const radius = 110;
     const color = d3.scaleOrdinal().domain(provinces).range(d3.schemeSet3);
-
     const pie = d3.pie().value(d => d.value).sort(null);
     const arc = d3.arc().innerRadius(0).outerRadius(radius);
     const outerArc = d3.arc().innerRadius(radius * 1.1).outerRadius(radius * 1.1);
@@ -211,19 +203,16 @@ function renderScene1(container, annotation, allData) {
 
         const row = data.find(d => +d.Year === +year);
 
-        // Group smaller provinces into 'Other'
         let pieDataRaw = provinces.map(p => ({
             province: p,
             value: row && row[p] ? +row[p] : 0
         }));
 
         const total = d3.sum(pieDataRaw, d => d.value);
-        const threshold = total * 0.05; // 5% threshold
+        const threshold = total * 0.05;
 
-        // Separate large provinces and small ones
         const largeProvinces = pieDataRaw.filter(d => d.value >= threshold);
         const smallProvinces = pieDataRaw.filter(d => d.value < threshold);
-
         const otherValue = d3.sum(smallProvinces, d => d.value);
         const pieData = largeProvinces.slice();
 
@@ -233,9 +222,7 @@ function renderScene1(container, annotation, allData) {
 
         const arcs = pie(pieData);
 
-        // Pie slices
         const paths = pieGroup.selectAll("path.slice").data(arcs, d => d.data.province);
-
         paths.enter()
             .append("path")
             .attr("class", "slice")
@@ -271,7 +258,6 @@ function renderScene1(container, annotation, allData) {
 
         paths.exit().remove();
 
-        // Guide lines
         const lines = polylineGroup.selectAll("polyline").data(arcs, d => d.data.province);
         lines.enter()
             .append("polyline")
@@ -290,7 +276,6 @@ function renderScene1(container, annotation, allData) {
             });
         lines.exit().remove();
 
-        // Labels outside pie
         const labels = labelGroup.selectAll("text").data(arcs, d => d.data.province);
         labels.enter()
             .append("text")
@@ -309,7 +294,6 @@ function renderScene1(container, annotation, allData) {
             .text(d => d.data.province);
         labels.exit().remove();
 
-        // Pie chart title
         const pieLegendX = pieX - radius;
         svg.append("text")
             .attr("class", "pie-chart-title")
@@ -319,7 +303,6 @@ function renderScene1(container, annotation, allData) {
             .attr("font-weight", "bold")
             .text(`Immigration by province: year ${selectedYear}`);
 
-        // Tooltip legend
         svg.append("text")
             .attr("class", "tooltip-legend")
             .attr("x", pieLegendX)
@@ -330,6 +313,4 @@ function renderScene1(container, annotation, allData) {
     }
 
     updatePieChart(selectedYear);
-
-
 }

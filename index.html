@@ -12,7 +12,7 @@
 <body>
     <div id="background">
         <div id="image-container">
-            <div id="intro-content">
+            <div id="intro-content-wrapper" class="content-wrapper">
                 <div>
                     <div id="intro-title-container">
                         <img id="intro-top-img" src="images/introduction-top.svg"></img>
@@ -59,40 +59,27 @@
                     </div>
                 </div>
             </div>
+            <!-- Main visualization container -->
+            <div id="visualization-content-wrapper" class="content-wrapper">
+                <div id="scene-container">
+                    <div id="annotation"></div>
+                </div>
+                <div id="controls">
+                    <button id="prev-btn" disabled>&#x25C0;</button>
+                    <button id="next-btn">&#x25B6;</button>
+                </div>
+            </div>
         </div>
         <footer id="page-footer">
             <p>Narrative visualization project for CS416: Data Visualization - Diego Farias Castro</p>
         </footer>
     </div>
-
-
-    <!-- Main visualization container -->
-    <div id="visualization-container" style="display:none;">
-        <div id="scene-container">
-            <div id="annotation"></div>
-        </div>
-
-        <div id="controls">
-            <button id="prev-btn" disabled>Previous</button>
-            <button id="next-btn">Next</button>
-        </div>
-    </div>
-
+    <script src="js/utils.js"></script>
     <script src="js/scene1.js"></script>
     <script src="js/scene2.js"></script>
     <script src="js/scene3.js"></script>
     <script src="js/scene4.js"></script>
     <script src="js/main.js"></script>
-
-    <script>
-        document.getElementById('start-btn').addEventListener('click', () => {
-            document.getElementById('image-container').style.display = 'none';
-            document.getElementById('visualization-container').style.display = 'block';
-            if (typeof loadScene === 'function' && window.allData) {
-                loadScene(0, window.allData);
-            }
-        });
-    </script>
 </body>
 
 </html>
