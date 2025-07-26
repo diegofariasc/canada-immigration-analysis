@@ -229,11 +229,15 @@ button:disabled {
 
 #controls {
     display: flex;
-    justify-content: right;
-    gap: 15px;
+    justify-content: space-between;
     width: 100%;
     min-height: fit-content;
     padding-top: 5px;
+}
+
+#controls>div {
+    display: flex;
+    gap: 15px;
 }
 
 #page-footer {

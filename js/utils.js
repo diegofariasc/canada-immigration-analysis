@@ -1,32 +1,32 @@
 function insertTitleAndDescription(container, title, textHtml) {
-    const parent = container.node().parentNode;
+    const parent = d3.select(container.node().parentNode);
+    parent.selectAll(".info-wrapper").remove();
 
-    const wrapper = d3.create("div")
+    const wrapper = parent.insert("div", () => container.node())
         .attr("class", "info-wrapper");
 
     wrapper.append("h1")
-        .text(title)
-        .attr("class", "info-title");
+        .attr("class", "info-title")
+        .text(title);
 
     wrapper.append("p")
-        .html(textHtml)
-        .attr("class", "info-text");
-
-    parent.insertBefore(wrapper.node(), container.node());
+        .attr("class", "info-text")
+        .html(textHtml);
 }
 
 function insertFooter(container, { textHtml = null, sources = [] } = {}) {
-    const parent = container.node().parentNode;
-    parent.querySelectorAll(".info-footer-wrapper").forEach(el => el.remove());
+    const parent = d3.select(container.node().parentNode);
+    parent.selectAll(".info-footer-wrapper").remove();
 
+    const controls = parent.select("#controls");
 
-    const wrapper = d3.create("div")
+    const wrapper = parent.insert("div", () => controls.node())
         .attr("class", "info-footer-wrapper");
 
     if (textHtml) {
         wrapper.append("p")
-            .html(textHtml)
-            .attr("class", "info-footer-text");
+            .attr("class", "info-footer-text")
+            .html(textHtml);
     }
 
     if (sources.length > 0) {
@@ -35,11 +35,9 @@ function insertFooter(container, { textHtml = null, sources = [] } = {}) {
 
         sources.forEach(source => {
             list.append("li")
-                .html(source)
-                .attr("class", "info-footer-source");
+                .attr("class", "info-footer-source")
+                .html(source);
         });
     }
-
-    const controls = parent.querySelector("#controls");
-    parent.insertBefore(wrapper.node(), controls);
 }
+

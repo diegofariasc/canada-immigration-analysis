@@ -5,6 +5,10 @@ const container = d3.select("#scene-container");
 const annotation = d3.select("#annotation");
 const prevBtn = d3.select("#prev-btn");
 const nextBtn = d3.select("#next-btn");
+const startBtn = d3.select("#start-btn");
+const backToIntroBtn = d3.select("#back-to-intro-btn");
+const introWrapper = d3.select("#intro-content-wrapper");
+const vizWrapper = d3.select("#visualization-content-wrapper");
 
 function loadScene(index, allData) {
     container.selectAll("svg").remove();
@@ -64,18 +68,22 @@ Promise.all([
     console.error("Error loading data:", err);
 });
 
-document.getElementById('start-btn').addEventListener('click', async () => {
-    const el = document.querySelector('.content-wrapper');
-    el.classList.add('fade-out-left')
-
-    document.getElementById('intro-content-wrapper').style.display = 'none';
-    document.getElementById('visualization-content-wrapper').style.display = 'flex';
+startBtn.on("click", () => {
+    d3.select(".content-wrapper").classed("fade-out-left", true);
+    introWrapper.style("display", "none");
+    vizWrapper.style("display", "flex");
 
     requestAnimationFrame(() => {
         if (typeof loadScene === 'function' && savedAllData) {
             loadScene(0, savedAllData);
         }
     });
+});
+
+backToIntroBtn.on("click", () => {
+    vizWrapper.style("display", "none");
+    introWrapper.style("display", "flex");
+    currentSceneIndex = 0;
 });
 
 prevBtn.on("click", () => {
