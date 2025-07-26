@@ -74,32 +74,51 @@ Promise.all([
     console.error("Error loading data:", err);
 });
 
-startBtn.on("click", () => {
-    d3.select(".content-wrapper").classed("fade-out-left", true);
+startBtn.on("click", async () => {
     introWrapper.style("display", "none");
     vizWrapper.style("display", "flex");
+    vizWrapper.attr("class", "content-wrapper appear-from-right");
 
-    requestAnimationFrame(() => {
+    requestAnimationFrame(async () => {
         if (typeof loadScene === 'function' && savedAllData) {
             loadScene(0, savedAllData);
+            await waitMs(500);
+            vizWrapper.attr("class", "content-wrapper visible");
         }
     });
 });
 
-backToIntroBtn.on("click", () => {
+backToIntroBtn.on("click", async () => {
+    vizWrapper.attr("class", "content-wrapper disappear-at-center");
+    await waitMs(250);
+
     vizWrapper.style("display", "none");
     introWrapper.style("display", "flex");
     currentSceneIndex = 0;
 });
 
-prevBtn.on("click", () => {
+prevBtn.on("click", async () => {
+    vizWrapper.attr("class", "content-wrapper disappear-to-right");
+    await waitMs(250);
+
+    vizWrapper.attr("class", "content-wrapper appear-from-left");
+
     if (currentSceneIndex > 0) {
         loadScene(currentSceneIndex - 1, savedAllData);
+        await waitMs(500)
+        vizWrapper.attr("class", "content-wrapper visible");
     }
 });
 
-nextBtn.on("click", () => {
+nextBtn.on("click", async () => {
+    vizWrapper.attr("class", "content-wrapper disappear-to-left");
+    await waitMs(250);
+
+    vizWrapper.attr("class", "content-wrapper appear-from-right");
+
     if (currentSceneIndex < 3) {
         loadScene(currentSceneIndex + 1, savedAllData);
+        await waitMs(500)
+        vizWrapper.attr("class", "content-wrapper visible");
     }
 });

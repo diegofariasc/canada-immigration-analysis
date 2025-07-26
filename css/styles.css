@@ -13,7 +13,7 @@ body {
 }
 
 #background {
-    animation: backgroundFadeZoom 1s ease-out forwards;
+    animation: backgroundAppear 1s ease-out forwards;
     width: 100%;
     height: 100%;
     display: flex;
@@ -21,6 +21,7 @@ body {
 }
 
 #image-container {
+    overflow: hidden;
     background-image: url('../images/background.svg');
     background-size: auto;
     background-repeat: repeat-x;
@@ -89,12 +90,29 @@ body {
     transform: translateY(15px);
 }
 
-.content-wrapper.fade-out-left {
-    animation: contentFadeSlideOutLeft 0.5s ease forwards;
+.content-wrapper.appear-from-right {
+    animation: appearFromRight 0.5s ease forwards;
 }
 
-.content-wrapper.slide-wrapper {
-    animation: contentFadeSlideInRight 0.5s ease forwards;
+.content-wrapper.disappear-to-left {
+    animation: disappearToLeft 0.5s ease forwards;
+}
+
+.content-wrapper.appear-from-left {
+    animation: appearFromLeft 0.5s ease forwards;
+}
+
+.content-wrapper.disappear-to-right {
+    animation: disappearToRight 0.5s ease forwards;
+}
+
+.content-wrapper.disappear-at-center {
+    animation: disappearAtCenter 0.5s ease forwards;
+}
+
+.content-wrapper.visible {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
 }
 
 .content-wrapper>div {
@@ -185,9 +203,9 @@ button:disabled {
 
 #intro-content-wrapper {
     max-width: 700px;
-    max-height: 90vh;
+    max-height: 80vh;
     width: 90%;
-    animation: contentFadeSlideIn 1s ease forwards 0.3s;
+    animation: appearFromCenter 1s ease forwards 0.3s;
 }
 
 #intro-content-wrapper h1 {
@@ -321,14 +339,7 @@ button:disabled {
     list-style-type: square;
 }
 
-@keyframes contentFadeSlideIn {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes backgroundFadeZoom {
+@keyframes backgroundAppear {
     0% {
         opacity: 0;
         transform: scale(1.05);
@@ -340,7 +351,56 @@ button:disabled {
     }
 }
 
-@keyframes contentFadeSlideOutLeft {
+@keyframes appearFromCenter {
+    0% {
+        opacity: 0;
+        transform: translateX(0) translateY(0) scale(0.95);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0) translateY(0) scale(1);
+    }
+}
+
+@keyframes disappearAtCenter {
+    0% {
+        opacity: 1;
+        transform: translateX(0) translateY(0) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(0) translateY(0) scale(0.95);
+    }
+}
+
+
+@keyframes appearFromLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-30%) translateY(0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0) translateY(0);
+    }
+}
+
+@keyframes appearFromRight {
+    0% {
+        opacity: 0;
+        transform: translateX(30%) translateY(0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0) translateY(0);
+    }
+}
+
+@keyframes disappearToLeft {
     0% {
         opacity: 1;
         transform: translateX(0) translateY(0);
@@ -352,15 +412,14 @@ button:disabled {
     }
 }
 
-
-@keyframes contentFadeSlideInRight {
+@keyframes disappearToRight {
     0% {
-        opacity: 0;
-        transform: translateX(30%) translateY(0);
+        opacity: 1;
+        transform: translateX(0) translateY(0);
     }
 
     100% {
-        opacity: 1;
-        transform: translateX(0) translateY(0);
+        opacity: 0;
+        transform: translateX(30%) translateY(0);
     }
 }

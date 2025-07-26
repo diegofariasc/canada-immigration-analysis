@@ -41,3 +41,6 @@ function insertFooter(container, { textHtml = null, sources = [] } = {}) {
     }
 }
 
+function waitMs(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
