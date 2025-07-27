@@ -11,7 +11,7 @@ function scene2_render(container, annotation, allData) {
     container.html("");
     scene2_data = allData.housingData;
 
-    insertTitleAndDescription(container, "Housing Costs: A Growing Hurdle",
+    insertTitleAndDescription(container, "Finding Home, Facing Prices",
         "Canada's housing prices pose a significant challenge for new immigrants. Observe the sustained growth, with sharp increases after the <strong>2008 housing market crisis</strong>, as the recovering market saw heightened demand. The most dramatic surge, however, occurred post-<strong>COVID-19 pandemic</strong>, driven by low interest rates and increased demand for living spaces, pushing prices to unprecedented levels. This escalating cost, particularly in major urban centers where many immigrants settle, often hinders successful integration"
     );
 
@@ -218,19 +218,19 @@ function scene2_drawChart(container, margin, years, maxPrice, averageByYear, top
     });
 }
 
-function scene2_drawProvince(prov, x, y, forceAnimate = false) {
-    const provData = scene2_data.filter(d => d.Province === prov).sort((a, b) => a.Year - b.Year);
+function scene2_drawProvince(province, x, y, forceAnimate = false) {
+    const provData = scene2_data.filter(d => d.Province === province).sort((a, b) => a.Year - b.Year);
     const lineGen = d3.line()
         .defined(d => d.AveragePrice_CAD != null)
         .x(d => x(d.Year))
         .y(d => y(d.AveragePrice_CAD));
 
-    const group = scene2_svg.append("g").attr("class", "line-group").attr("data-prov", prov);
+    const group = scene2_svg.append("g").attr("class", "line-group").attr("data-prov", province);
 
     const path = group.append("path")
         .datum(provData)
         .attr("fill", "none")
-        .attr("stroke", scene2_color(prov))
+        .attr("stroke", scene2_color(province))
         .attr("stroke-width", 2)
         .attr("opacity", 0.9)
         .attr("d", lineGen);
@@ -256,19 +256,36 @@ function scene2_drawProvince(prov, x, y, forceAnimate = false) {
         .attr("cx", d => x(d.Year))
         .attr("cy", d => y(d.AveragePrice_CAD))
         .attr("r", 0)
-        .attr("fill", scene2_color(prov))
+        .attr("fill", scene2_color(province))
         .attr("opacity", 0.9)
+        .attr("cursor", "pointer")
         .on("mouseover", (event, d) => {
+            d3.select(event.currentTarget)
+                .attr("stroke", "black")
+                .attr("stroke-width", 2)
+                .attr("r", 6)
+                .raise();
+
             scene2_tooltip.transition().duration(200).style("opacity", 1);
             scene2_tooltip.html(`
-                <strong>${d.Province}</strong><br/>
+                <strong class="tooltip-strong">${d.Province}</strong><br/>
                 Year: ${d.Year}<br/>
-                Price: $${d.AveragePrice_CAD.toLocaleString()}
-            `)
-                .style("left", (event.pageX + 10) + "px")
-                .style("top", (event.pageY - 28) + "px");
+                Price: $${d.AveragePrice_CAD.toLocaleString()} CAD`)
+                .style("left", (event.pageX - 10) + "px")
+                .style("top", (event.pageY - 28) + "px").style("position", "absolute")
+                .style("pointer-events", "none")
+                .style("background", "rgba(0,0,0,0.7)")
+                .style("color", "white")
+                .style("padding", "6px 10px")
+                .style("border-radius", "4px")
+                .style("border", "none")
+                .style("font-size", "12px")
         })
-        .on("mouseout", () => {
+        .on("mouseout", function () {
+            d3.select(this)
+                .attr("stroke", "none")
+                .attr("r", 5);
+
             scene2_tooltip.transition().duration(500).style("opacity", 0);
         });
 
@@ -276,12 +293,12 @@ function scene2_drawProvince(prov, x, y, forceAnimate = false) {
         circles.transition()
             .delay((d, i) => i * delayPerPoint)
             .duration(200)
-            .attr("r", 4);
+            .attr("r", 5);
     } else {
-        circles.attr("r", 4);
+        circles.attr("r", 5);
     }
 
-    scene2_visibleLines.set(prov, group);
+    scene2_visibleLines.set(province, group);
 }
 
 function scene2_removeProvince(prov) {

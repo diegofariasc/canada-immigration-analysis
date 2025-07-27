@@ -10,7 +10,7 @@ function scene3_render(container, _, allData) {
 
     insertTitleAndDescription(
         container,
-        "Qualified, Yet Challenged: Canada's Job Market",
+        "PR Granted, Employment Denied",
         "Despite Canada's high immigration, <strong>securing employment</strong> remains difficult for newcomers. While <strong>Ontario</strong> attracts the most immigrants, it faces the <strong>highest unemployment rate</strong>. This is further complicated by <strong>foreign credential recognition difficulties</strong>. In 2023, the Ontario Office of the Fairness Commissioner report found that over 60% of internationally trained professionals face delays or barriers when seeking license recognition, severely impeding their economic integration"
     );
 
