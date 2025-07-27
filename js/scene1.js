@@ -60,8 +60,8 @@ function scene1_drawChart() {
 
     insertFooter(container, {
         textHtml: isWide
-            ? "<strong>Hover</strong> over the bar chart to see details for each year or <strong>click</strong> a bar to view the immigrant distribution by province for that year"
-            : "<strong>Hover</strong> to see details for each year. Province-level data is not available on small screens.",
+            ? "<strong>Hover</strong> over the bar chart to see immigrant totals by year or over the pie chart to see details by province.<br><strong>Click</strong> a bar to update the pie chart to that year."
+            : "<strong>Hover</strong> over the bar chart to see immigrant totals by year. Province-level pie chart is not available on small screens",
         sources: ["Statistics Canada, <i>Estimates of demographic growth components (annual)</i>"]
     });
 
@@ -106,6 +106,8 @@ function scene1_drawChart() {
         .attr("y", barHeight + 50)
         .attr("text-anchor", "middle")
         .attr("font-size", "12px")
+        .attr("font-family", "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif")
+        .attr("font-weight", 500)
         .attr("fill", "#333")
         .text("Year");
 
@@ -117,12 +119,14 @@ function scene1_drawChart() {
         .attr("y", -yAxisBBox.width - 20)
         .attr("text-anchor", "middle")
         .attr("font-size", "12px")
+        .attr("font-family", "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif")
+        .attr("font-weight", 500)
         .attr("fill", "#333")
         .text("Total Immigrants");
 
     const barsGroup = barGroup.append("g");
-    const barColor = "#555555";
-    const barSelectedColor = "#f57c00";
+    const barColor = "#007acc";
+    const barSelectedColor = "#1a237e";
 
     const bars = barsGroup.selectAll(".bar")
         .data(data)
@@ -144,7 +148,7 @@ function scene1_drawChart() {
         .on("mouseover", (event, d) => {
             d3.select(event.currentTarget).attr("fill", d.Year === scene1_selectedYear ? d3.color(barSelectedColor).brighter(0.7) : d3.color(barColor).brighter(1));
             scene1_tooltip.style("visibility", "visible")
-                .html(`<strong>Year:</strong> ${d.Year}<br><strong>Total immigrants:</strong> ${d.totalImmigrants.toLocaleString()}`)
+                .html(`<strong class="tooltip-strong">Year:</strong> ${d.Year}<br><strong class="tooltip-strong">Total immigrants:</strong> ${d.totalImmigrants.toLocaleString()}`)
                 .style("top", (event.pageY - 40) + "px")
                 .style("left", (event.pageX + 10) + "px");
         })
@@ -201,8 +205,8 @@ function scene1_drawTrendLine(group, x, y) {
     const path = group.append("path")
         .datum(trendData)
         .attr("fill", "none")
-        .attr("stroke", "#2196f3")
-        .attr("stroke-width", 2)
+        .attr("stroke", "#c62828")
+        .attr("stroke-width", 4)
         .attr("stroke-dasharray", "5,5")
         .attr("d", line);
 
@@ -224,10 +228,13 @@ function scene1_drawTrendLine(group, x, y) {
 function scene1_updatePieChart(pieGroup, pieRadius) {
     const data = scene1_dataGlobal;
     const provinces = scene1_provincesGlobal;
-    const color = d3.scaleOrdinal().domain(provinces).range(d3.schemeSet3);
+    const color = d3.scaleOrdinal()
+        .domain(provinces)
+        .range(provinces.map(p => provincesColorPalette[p] || "#999999"));
+
     const pie = d3.pie().value(d => d.value).sort(null);
     const arc = d3.arc().innerRadius(0).outerRadius(pieRadius);
-    const outerArc = d3.arc().innerRadius(pieRadius * 1.1).outerRadius(pieRadius * 1.1);
+    const outerArc = d3.arc().innerRadius(pieRadius * 1.1).outerRadius(pieRadius);
 
     const row = data.find(d => +d.Year === +scene1_selectedYear);
     const pieDataRaw = provinces.map(p => ({ province: p, value: row && row[p] ? +row[p] : 0 }));
@@ -241,6 +248,12 @@ function scene1_updatePieChart(pieGroup, pieRadius) {
     if (otherValue > 0) pieData.push({ province: "Other", value: otherValue });
 
     const arcs = pie(pieData);
+
+    if (!scene1_hasRendered) {
+        pieGroup.transition()
+            .duration(200)
+            .attr("opacity", 0);
+    }
 
     let linesGroup = pieGroup.select("g.lines");
     if (linesGroup.empty()) linesGroup = pieGroup.append("g").attr("class", "lines");
@@ -283,18 +296,18 @@ function scene1_updatePieChart(pieGroup, pieRadius) {
         .on("mouseover", (event, d) => {
             d3.select(event.currentTarget).attr("fill", d3.color(d.data.province === "Other" ? "#999999" : color(d.data.province)).darker(0.7));
             const percent = ((d.data.value / d3.sum(pieData, dd => dd.value)) * 100).toFixed(1);
-            tooltip.style("visibility", "visible")
-                .html(`<strong>${d.data.province}</strong><br>${d.data.value.toLocaleString()} immigrants<br>${percent}%`)
+            scene1_tooltip.style("visibility", "visible")
+                .html(`<strong class="tooltip-strong">${d.data.province}</strong><br>${d.data.value.toLocaleString()} immigrants<br>${percent}%`)
                 .style("top", (event.pageY - 40) + "px")
                 .style("left", (event.pageX + 10) + "px");
         })
         .on("mousemove", (event) => {
-            tooltip.style("top", (event.pageY - 40) + "px")
+            scene1_tooltip.style("top", (event.pageY - 40) + "px")
                 .style("left", (event.pageX + 10) + "px");
         })
         .on("mouseout", (event, d) => {
             d3.select(event.currentTarget).attr("fill", d.data.province === "Other" ? "#999999" : color(d.data.province));
-            tooltip.style("visibility", "hidden");
+            scene1_tooltip.style("visibility", "hidden");
         })
         .merge(paths)
         .transition()
@@ -347,4 +360,12 @@ function scene1_updatePieChart(pieGroup, pieRadius) {
             .style("text-anchor", d => ((d.endAngle + d.startAngle) / 2 < Math.PI ? "start" : "end"))
             .text(d => d.data.province);
     }
+
+    if (!scene1_hasRendered) {
+        pieGroup.transition()
+            .delay(500)
+            .duration(500)
+            .attr("opacity", 1);
+    }
 }
+

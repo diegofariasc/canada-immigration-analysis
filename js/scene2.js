@@ -1,19 +1,22 @@
 let scene2_hasRendered = false;
 let scene2_svg, scene2_x, scene2_y, scene2_xAxis, scene2_yAxis, scene2_tooltip, scene2_checkboxContainer;
 let scene2_selectedProvinces = new Set();
+let scene2_data;
+let scene2_color;
 const scene2_visibleLines = new Map();
+
+let scene2_container, scene2_margin, scene2_years, scene2_maxPrice, scene2_avgByYear, scene2_topProvinces;
 
 function scene2_render(container, annotation, allData) {
     container.html("");
+    scene2_data = allData.housingData;
 
-    insertTitleAndDescription(
-        container,
-        "Housing Costs: A Growing Hurdle",
+    insertTitleAndDescription(container, "Housing Costs: A Growing Hurdle",
         "Canada's housing prices pose a significant challenge for new immigrants. Observe the sustained growth, with sharp increases after the <strong>2008 housing market crisis</strong>, as the recovering market saw heightened demand. The most dramatic surge, however, occurred post-<strong>COVID-19 pandemic</strong>, driven by low interest rates and increased demand for living spaces, pushing prices to unprecedented levels. This escalating cost, particularly in major urban centers where many immigrants settle, often hinders successful integration"
     );
 
     insertFooter(container, {
-        textHtml: "Provinces preselected based on recent high migration inflows: British Columbia, Quebec, and Ontario. <strong>Toggle</strong> to compare housing price trends across different provinces. <strong>Hover</strong> to see details for each year",
+        textHtml: "Provinces preselected based on recent high migration inflows: British Columbia, Quebec, and Ontario.</br><strong>Toggle</strong> to compare housing price trends across different provinces and <strong>hover</strong> to see details for each year",
         sources: ["Statistics Canada, <i>Estimates of demographic growth components (annual)</i>"]
     });
 
@@ -22,23 +25,30 @@ function scene2_render(container, annotation, allData) {
     const isWide = containerWidth > 600;
     const margin = { top: 40, right: 30 + (isWide ? 120 : 0), bottom: 40, left: 90 };
 
-    const topProvinces = ["Ontario", "British Columbia", "Quebec"];
-    const color = d3.scaleOrdinal().range(d3.schemeTableau10);
-
-    const data = allData.housingData;
-    data.forEach(d => d.Year = +d.Year);
-
-    const provinces = Array.from(new Set(data.map(d => d.Province)))
+    const provinces = Array.from(new Set(scene2_data.map(d => d.Province)))
         .filter(p => p !== "Canada")
         .sort();
-    color.domain(provinces);
 
-    const years = Array.from(new Set(data.map(d => d.Year))).sort((a, b) => a - b);
-    const maxPrice = d3.max(data, d => +d.AveragePrice_CAD);
+    const topProvinces = ["Ontario", "British Columbia", "Quebec"];
+    scene2_color = d3.scaleOrdinal()
+        .domain(provinces)
+        .range(provinces.map(p => provincesColorPalette[p] || provincesColorPalette["Other"]));
+
+    scene2_data.forEach(d => d.Year = +d.Year);
+
+    const years = Array.from(new Set(scene2_data.map(d => d.Year))).sort((a, b) => a - b);
+    const maxPrice = d3.max(scene2_data, d => +d.AveragePrice_CAD);
     const averageByYear = years.map(year => {
-        const yearData = data.filter(d => d.Year === year && d.Province !== "Canada");
+        const yearData = scene2_data.filter(d => d.Year === year && d.Province !== "Canada");
         return { year, avg: d3.mean(yearData, d => +d.AveragePrice_CAD) };
     });
+
+    scene2_container = container;
+    scene2_margin = margin;
+    scene2_years = years;
+    scene2_maxPrice = maxPrice;
+    scene2_avgByYear = averageByYear;
+    scene2_topProvinces = topProvinces;
 
     scene2_checkboxContainer = container.insert("div", ":first-child")
         .attr("id", "province-selector");
@@ -67,7 +77,7 @@ function scene2_render(container, annotation, allData) {
             .style("display", "inline-block")
             .style("width", "22px")
             .style("height", "14px")
-            .style("background-color", color(prov))
+            .style("background-color", scene2_color(prov))
             .style("margin-right", "10px")
             .style("border-radius", "3px")
             .style("box-shadow", "0 0 2px rgba(0,0,0,0.2)");
@@ -79,7 +89,7 @@ function scene2_render(container, annotation, allData) {
 
     scene2_checkboxContainer.selectAll("input[type=checkbox]").on("change", scene2_updateLines);
 
-    scene2_drawChart(container, margin, data, years, maxPrice, averageByYear, color, provinces, topProvinces);
+    scene2_drawChart(container, margin, years, maxPrice, averageByYear, topProvinces);
 
     scene2_hasRendered = true;
 
@@ -89,11 +99,13 @@ function scene2_render(container, annotation, allData) {
 }
 
 function scene2_onResize() {
-    scene2_drawChart(container, margin, data, years, maxPrice, averageByYear, color, provinces, topProvinces);
+    if (!scene2_container || !scene2_margin) return;
+    scene2_drawChart(scene2_container, scene2_margin, scene2_years, scene2_maxPrice, scene2_avgByYear, scene2_topProvinces);
     scene2_updateLines();
 }
 
-function scene2_drawChart(container, margin, data, years, maxPrice, averageByYear, color, provinces, topProvinces) {
+
+function scene2_drawChart(container, margin, years, maxPrice, averageByYear, topProvinces) {
     container.select("svg").remove();
     scene2_visibleLines.clear();
     scene2_selectedProvinces.clear();
@@ -145,7 +157,7 @@ function scene2_drawChart(container, margin, data, years, maxPrice, averageByYea
     scene2_svg.append("path")
         .datum(averageByYear)
         .attr("fill", "none")
-        .attr("stroke", "black")
+        .attr("stroke", "gray")
         .attr("stroke-width", 2.5)
         .attr("stroke-dasharray", "5 5")
         .attr("class", "national-average-line")
@@ -157,7 +169,7 @@ function scene2_drawChart(container, margin, data, years, maxPrice, averageByYea
         scene2_svg.append("text")
             .attr("x", scene2_x(lastAvg.year) + 5)
             .attr("y", scene2_y(lastAvg.avg) - 15)
-            .attr("fill", "black")
+            .attr("fill", "gray")
             .style("font-size", "12px")
             .text("National Average");
     }
@@ -201,13 +213,13 @@ function scene2_drawChart(container, margin, data, years, maxPrice, averageByYea
     }
 
     topProvinces.forEach(prov => {
-        scene2_drawProvince(prov, data, scene2_x, scene2_y, color);
+        scene2_drawProvince(prov, scene2_x, scene2_y);
         scene2_selectedProvinces.add(prov);
     });
 }
 
-function scene2_drawProvince(prov, data, x, y, color) {
-    const provData = data.filter(d => d.Province === prov).sort((a, b) => a.Year - b.Year);
+function scene2_drawProvince(prov, x, y, forceAnimate = false) {
+    const provData = scene2_data.filter(d => d.Province === prov).sort((a, b) => a.Year - b.Year);
     const lineGen = d3.line()
         .defined(d => d.AveragePrice_CAD != null)
         .x(d => x(d.Year))
@@ -218,14 +230,14 @@ function scene2_drawProvince(prov, data, x, y, color) {
     const path = group.append("path")
         .datum(provData)
         .attr("fill", "none")
-        .attr("stroke", color(prov))
+        .attr("stroke", scene2_color(prov))
         .attr("stroke-width", 2)
         .attr("opacity", 0.9)
         .attr("d", lineGen);
 
     const totalLength = path.node().getTotalLength();
 
-    if (!scene2_hasRendered) {
+    if (!scene2_hasRendered || forceAnimate) {
         path.attr("stroke-dasharray", totalLength + " " + totalLength)
             .attr("stroke-dashoffset", totalLength)
             .transition().duration(1500).attr("stroke-dashoffset", 0);
@@ -244,7 +256,7 @@ function scene2_drawProvince(prov, data, x, y, color) {
         .attr("cx", d => x(d.Year))
         .attr("cy", d => y(d.AveragePrice_CAD))
         .attr("r", 0)
-        .attr("fill", color(prov))
+        .attr("fill", scene2_color(prov))
         .attr("opacity", 0.9)
         .on("mouseover", (event, d) => {
             scene2_tooltip.transition().duration(200).style("opacity", 1);
@@ -260,7 +272,7 @@ function scene2_drawProvince(prov, data, x, y, color) {
             scene2_tooltip.transition().duration(500).style("opacity", 0);
         });
 
-    if (!scene2_hasRendered) {
+    if (!scene2_hasRendered || forceAnimate) {
         circles.transition()
             .delay((d, i) => i * delayPerPoint)
             .duration(200)
@@ -291,7 +303,7 @@ function scene2_updateLines() {
 
     checked.forEach(prov => {
         if (!scene2_selectedProvinces.has(prov)) {
-            scene2_drawProvince(prov, data, scene2_x, scene2_y, color);
+            scene2_drawProvince(prov, scene2_x, scene2_y, true);
             scene2_selectedProvinces.add(prov);
         }
     });

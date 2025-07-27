@@ -1,9 +1,11 @@
 let scene3_hasRendered = false;
 let scene3_data;
 let scene3_margin;
+let scene3_globalContainer;
 
 function scene3_render(container, _, allData) {
     scene3_data = allData.unemploymentData;
+    scene3_globalContainer = container;
     scene3_margin = { top: 60, right: 200, bottom: 60, left: 80 };
 
     insertTitleAndDescription(
@@ -19,14 +21,15 @@ function scene3_render(container, _, allData) {
 
     scene3_draw(container);
     scene3_hasRendered = true;
-    window.addEventListener("resize", () => scene3_draw(container));
+    window.addEventListener("resize", scene3_draw);
 }
 
-function scene3_draw(container) {
-    container.selectAll("svg").remove();
-    container.selectAll(".tooltip").remove();
 
-    const containerNode = container.node();
+function scene3_draw() {
+    scene3_globalContainer.selectAll("svg").remove();
+    scene3_globalContainer.selectAll(".tooltip").remove();
+
+    const containerNode = scene3_globalContainer.node();
     const containerWidth = containerNode.clientWidth;
     const containerHeight = containerNode.clientHeight;
     const isHighEnough = containerHeight >= 260;
@@ -34,7 +37,7 @@ function scene3_draw(container) {
     const width = containerWidth - scene3_margin.left - scene3_margin.right + (isHighEnough ? 0 : 140);
     const height = containerHeight - scene3_margin.top - scene3_margin.bottom;
 
-    const svg = container.append("svg")
+    const svg = scene3_globalContainer.append("svg")
         .attr("width", containerWidth)
         .attr("height", containerHeight)
         .append("g")
@@ -51,7 +54,7 @@ function scene3_draw(container) {
     scene3_drawAxes(svg, x, y, width, height);
 
     const scene3_color = d3.scaleOrdinal().domain(scene3_data.map(d => d.Province)).range(d3.schemeTableau10);
-    const scene3_tooltip = scene3_createTooltip(container);
+    const scene3_tooltip = scene3_createTooltip(scene3_globalContainer);
     const scene3_points = scene3_drawPoints(svg, scene3_data, x, y, scene3_color, height, scene3_tooltip);
 
     if (!scene3_hasRendered) {

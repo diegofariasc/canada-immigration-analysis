@@ -140,7 +140,7 @@ body {
     font-size: 0.8rem;
 }
 
-.content-wrapper strong {
+.content-wrapper strong:not(.tooltip-strong) {
     color: #1a237e;
     font-weight: 600;
 }

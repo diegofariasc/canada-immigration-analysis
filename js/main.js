@@ -13,8 +13,11 @@ const vizWrapper = d3.select("#visualization-content-wrapper");
 function loadScene(index, allData) {
     scene1_hasRendered = false;
     scene2_hasRendered = false;
+    scene3_hasRendered = false;
+
     window.removeEventListener("resize", scene1_drawChart);
     window.removeEventListener("resize", scene2_onResize);
+    window.removeEventListener("resize", scene3_draw);
 
     container.selectAll("svg").remove();
     container.selectAll("div.chart").remove();
