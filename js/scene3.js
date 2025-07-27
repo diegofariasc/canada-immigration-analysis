@@ -147,8 +147,8 @@ function scene3_drawPoints(svg, data, x, _, color, height, tooltip) {
                 <strong class="tooltip-strong">${d.Province}</strong><br/>
                 Immigrants: ${d["Number of immigrants"].toLocaleString()}<br/>
                 Unemployment: ${d["Unemployment rate"]}%`)
-                .style("left", (event.pageX + 15) + "px")
-                .style("top", (event.pageY - 30) + "px");
+                .style("left", (event.pageX - 80) + "px")
+                .style("top", (event.pageY - 20) + "px");
         })
         .on("mouseout", (event) => {
             d3.select(event.currentTarget)
