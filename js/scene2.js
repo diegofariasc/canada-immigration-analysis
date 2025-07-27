@@ -168,7 +168,7 @@ function scene2_drawChart(container, margin, years, maxPrice, averageByYear, top
     if (isWide) {
         scene2_svg.append("text")
             .attr("x", scene2_x(lastAvg.year) + 5)
-            .attr("y", scene2_y(lastAvg.avg) - 15)
+            .attr("y", scene2_y(lastAvg.avg))
             .attr("fill", "gray")
             .style("font-size", "12px")
             .text("National Average");

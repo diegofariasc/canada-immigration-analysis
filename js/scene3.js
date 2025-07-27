@@ -10,13 +10,13 @@ function scene3_render(container, _, allData) {
 
     insertTitleAndDescription(
         container,
-        "PR Granted, Employment Denied",
+        "Canada's Newcomer Job Puzzle",
         "Despite Canada's high immigration, <strong>securing employment</strong> remains difficult for newcomers. While <strong>Ontario</strong> attracts the most immigrants, it faces the <strong>highest unemployment rate</strong>. This is further complicated by <strong>foreign credential recognition difficulties</strong>. In 2023, the Ontario Office of the Fairness Commissioner report found that over 60% of internationally trained professionals face delays or barriers when seeking license recognition, severely impeding their economic integration"
     );
 
     insertFooter(container, {
-        textHtml: "Provinces preselected based on recent high migration inflows: British Columbia, Quebec, and Ontario. <strong>Toggle</strong> to compare housing price trends across different provinces. <strong>Hover</strong> to see details for each year",
-        sources: ["Statistics Canada, <i>Estimates of demographic growth components (annual)</i>"]
+        textHtml: "Ontario attracts many newcomers through its accessible <strong>Provincial Nominee Program (PNP)</strong>, which facilitates <strong>permanent residency (PR)</strong> but requires to live and work in the province for up to <strong>3 years</strong>, regardless of job prospects. Over <strong>30%</strong> of immigrants arrived via PNP in 2023. <strong>Hover</strong> to see details for every province.",
+        sources: ["Statistics Canada, <i>Employment and unemployment rate, monthly, unadjusted for seasonality</i>", "Statistics Canada, <i>Estimates of demographic growth components (annual)</i>"]
     });
 
     scene3_draw(container);
@@ -55,6 +55,14 @@ function scene3_draw() {
 
     const scene3_color = d3.scaleOrdinal().domain(scene3_data.map(d => d.Province)).range(d3.schemeTableau10);
     const scene3_tooltip = scene3_createTooltip(scene3_globalContainer);
+
+    scene3_drawAverageLine(svg, scene3_data, y, width);
+
+    const ontario = scene3_data.find(d => d.Province === "Ontario");
+    if (ontario) {
+        scene3_drawOntarioAnnotation(svg, ontario, x, y);
+    }
+
     const scene3_points = scene3_drawPoints(svg, scene3_data, x, y, scene3_color, height, scene3_tooltip);
 
     if (!scene3_hasRendered) {
@@ -71,13 +79,6 @@ function scene3_draw() {
 
     if (isHighEnough) {
         scene3_drawLegend(svg, scene3_data, scene3_color, width, containerHeight);
-    }
-
-    scene3_drawAverageLine(svg, scene3_data, y, width);
-
-    const ontario = scene3_data.find(d => d.Province === "Ontario");
-    if (ontario) {
-        scene3_drawOntarioAnnotation(svg, ontario, x, y);
     }
 }
 
@@ -114,11 +115,13 @@ function scene3_createTooltip(container) {
         .attr("class", "tooltip")
         .style("opacity", 0)
         .style("position", "absolute")
-        .style("background", "#fff")
-        .style("border", "1px solid #ccc")
-        .style("padding", "8px")
+        .style("background", "rgba(0,0,0,0.7)")
+        .style("border", "none")
+        .style("padding", "6px 10px")
         .style("border-radius", "4px")
-        .style("pointer-events", "none");
+        .style("font-size", "11px")
+        .style("pointer-events", "none")
+        .style("color", "white");
 }
 
 function scene3_drawPoints(svg, data, x, _, color, height, tooltip) {
@@ -131,16 +134,27 @@ function scene3_drawPoints(svg, data, x, _, color, height, tooltip) {
         .attr("r", 6)
         .attr("fill", d => color(d.Province))
         .attr("opacity", 0)
+        .attr("cursor", "pointer")
         .on("mouseover", (event, d) => {
+            d3.select(event.currentTarget)
+                .attr("stroke", "black")
+                .attr("stroke-width", 2)
+                .attr("r", 7)
+                .raise();
+
             tooltip.transition().duration(200).style("opacity", 1);
             tooltip.html(`
-                <strong>${d.Province}</strong><br/>
+                <strong class="tooltip-strong">${d.Province}</strong><br/>
                 Immigrants: ${d["Number of immigrants"].toLocaleString()}<br/>
                 Unemployment: ${d["Unemployment rate"]}%`)
                 .style("left", (event.pageX + 15) + "px")
                 .style("top", (event.pageY - 30) + "px");
         })
-        .on("mouseout", () => {
+        .on("mouseout", (event) => {
+            d3.select(event.currentTarget)
+                .attr("stroke", "none")
+                .attr("r", 6);
+
             tooltip.transition().duration(200).style("opacity", 0);
         });
 }
@@ -177,7 +191,7 @@ function scene3_drawAverageLine(svg, data, y, width) {
         .attr("y2", y(mean))
         .attr("stroke", "#999")
         .attr("stroke-dasharray", "4 4")
-        .attr("stroke-width", 1.5);
+        .attr("stroke-width", 2);
 
     svg.append("text")
         .attr("x", width - 10)
@@ -196,7 +210,7 @@ function scene3_drawOntarioAnnotation(svg, ontario, x, y) {
         .attr("x1", ox)
         .attr("y1", oy)
         .attr("x2", ox - 80)
-        .attr("y2", oy - 60)
+        .attr("y2", oy - 50)
         .attr("stroke", "gray")
         .attr("stroke-width", 1.5)
         .attr("stroke-dasharray", "4 2")
