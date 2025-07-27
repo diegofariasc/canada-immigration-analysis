@@ -293,6 +293,7 @@ button:disabled {
     width: 100%;
     min-height: fit-content;
     padding-top: 5px;
+    flex-shrink: 0;
 }
 
 #controls>div {
@@ -318,6 +319,7 @@ button:disabled {
     flex-direction: column;
     min-height: fit-content;
     align-items: flex-start;
+    flex-shrink: 0;
 }
 
 #page-footer p {
@@ -328,6 +330,7 @@ button:disabled {
     min-height: fit-content;
     font-size: 0.8rem;
     width: 100%;
+    flex-shrink: 0;
 }
 
 .info-footer-text {

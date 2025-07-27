@@ -16,8 +16,8 @@ function scene2_render(container, annotation, allData) {
     );
 
     insertFooter(container, {
-        textHtml: "Provinces preselected based on recent high migration inflows: British Columbia, Quebec, and Ontario.</br><strong>Toggle</strong> to compare housing price trends across different provinces and <strong>hover</strong> to see details for each year",
-        sources: ["Statistics Canada, <i>Estimates of demographic growth components (annual)</i>"]
+        textHtml: `<strong>British Columbia</strong> and <strong>Ontario</strong> were preselected as they are the top immigrant destinations. Between 2020 and 2024, <strong>Ontario</strong> housing prices rose by <strong>$199,359 CAD (29%)</strong>. Meanwhile, <strong>British Columbia</strong> a saw an even sharper increase of <strong>$236,742 CAD (31%)</strong>. <strong>Toggle</strong> to compare prices of other provinces and <strong>hover</strong> for yearly details`,
+        sources: ["Statistics Canada, <i>New housing price index, monthly</i>", "Canadian Real Estate Association, <i>National Price Map</i>"]
     });
 
     const containerNode = container.node();
@@ -29,7 +29,7 @@ function scene2_render(container, annotation, allData) {
         .filter(p => p !== "Canada")
         .sort();
 
-    const topProvinces = ["Ontario", "British Columbia", "Quebec"];
+    const topProvinces = ["Ontario", "British Columbia"];
     scene2_color = d3.scaleOrdinal()
         .domain(provinces)
         .range(provinces.map(p => provincesColorPalette[p] || provincesColorPalette["Other"]));
@@ -124,7 +124,7 @@ function scene2_drawChart(container, margin, years, maxPrice, averageByYear, top
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    scene2_y = d3.scaleLinear().domain([0, maxPrice * 1.1]).range([height, 0]);
+    scene2_y = d3.scaleLinear().domain([0, maxPrice * 1.3]).range([height, 0]);
     scene2_x = d3.scaleLinear().domain(d3.extent(years)).range([0, width]);
 
     scene2_xAxis = d3.axisBottom(scene2_x).ticks(5).tickFormat(d3.format("d"));

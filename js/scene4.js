@@ -1,9 +1,8 @@
-function renderScene4(container, annotation, allData) {
+function scene4_render(container, annotation, allData) {
     const data = allData.healthData;
-    const geoData = allData.provinces; // Ya es FeatureCollection (GeoJSON)
+    const geoData = allData.provinces;
 
     container.selectAll("*").remove();
-    container.insert("h2", ":first-child").text("Unmet Health Needs Across Canadian Provinces");
 
     const width = 800;
     const height = 500;
