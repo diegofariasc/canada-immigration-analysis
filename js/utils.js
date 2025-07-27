@@ -44,3 +44,26 @@ function insertFooter(container, { textHtml = null, sources = [] } = {}) {
 function waitMs(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+function filterPolygonsByLat(feature) {
+    if (feature.geometry.type === "MultiPolygon") {
+        const filteredPolygons = feature.geometry.coordinates.filter(polygon => {
+            const maxLat = d3.max(polygon.flat(), d => d[1]);
+            return maxLat <= LATITUDE_LIMIT;
+        });
+        return {
+            ...feature,
+            geometry: {
+                ...feature.geometry,
+                coordinates: filteredPolygons
+            }
+        };
+    } else if (feature.geometry.type === "Polygon") {
+        const maxLat = d3.max(feature.geometry.coordinates.flat(), d => d[1]);
+        if (maxLat > LATITUDE_LIMIT) {
+            return null;
+        }
+        return feature;
+    }
+    return feature;
+}

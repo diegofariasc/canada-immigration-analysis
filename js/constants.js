@@ -14,3 +14,5 @@ const provincesColorPalette = {
     "Nunavut": "#ec407a",
     "Other": "#7f7f7f"
 };
+
+const LATITUDE_LIMIT = 75;

@@ -102,6 +102,10 @@ body {
     animation: appearFromLeft 0.5s ease forwards;
 }
 
+.content-wrapper.appear-from-center {
+    animation: appearFromCenter 0.5s ease forwards;
+}
+
 .content-wrapper.disappear-to-right {
     animation: disappearToRight 0.5s ease forwards;
 }
@@ -342,6 +346,15 @@ button:disabled {
     list-style-type: square;
 }
 
+.animated-map-path {
+    transform-origin: center;
+    transform-box: fill-box;
+    opacity: 0;
+    animation-delay: 1s;
+    animation: mapPopIn 0.6s ease-out forwards;
+}
+
+
 @keyframes backgroundAppear {
     0% {
         opacity: 0;
@@ -424,5 +437,17 @@ button:disabled {
     100% {
         opacity: 0;
         transform: translateX(30%) translateY(0);
+    }
+}
+
+@keyframes mapPopIn {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
     }
 }

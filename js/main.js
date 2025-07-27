@@ -14,6 +14,7 @@ function loadScene(index, allData) {
     scene1_hasRendered = false;
     scene2_hasRendered = false;
     scene3_hasRendered = false;
+    scene4_hasRendered = false;
 
     window.removeEventListener("resize", scene1_drawChart);
     window.removeEventListener("resize", scene2_onResize);
@@ -64,12 +65,21 @@ Promise.all([
         d["unmet needs percentage"] = +d["unmet needs percentage"];
     });
 
+    const filteredFeatures = provinces.features
+        .map(filterPolygonsByLat)
+        .filter(f => f !== null && f.geometry.coordinates.length > 0);
+
+    const filteredProvinces = {
+        type: "FeatureCollection",
+        features: filteredFeatures
+    };
+
     savedAllData = {
         immigrationData,
         housingData,
         unemploymentData,
         healthData,
-        provinces
+        provinces: filteredProvinces
     };
 
 }).catch(err => {
