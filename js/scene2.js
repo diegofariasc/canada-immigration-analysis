@@ -1,9 +1,9 @@
-let hasRenderedScene2 = false;
-let svg, x, y, xAxis, yAxis, scene2tooltip, checkboxContainer;
-const visibleLines = new Map();
-let selectedProvinces = new Set();
+let scene2_hasRendered = false;
+let scene2_svg, scene2_x, scene2_y, scene2_xAxis, scene2_yAxis, scene2_tooltip, scene2_checkboxContainer;
+let scene2_selectedProvinces = new Set();
+const scene2_visibleLines = new Map();
 
-function renderScene2(container, annotation, allData) {
+function scene2_render(container, annotation, allData) {
     container.html("");
 
     insertTitleAndDescription(
@@ -12,12 +12,10 @@ function renderScene2(container, annotation, allData) {
         "Canada's housing prices pose a significant challenge for new immigrants. Observe the sustained growth, with sharp increases after the <strong>2008 housing market crisis</strong>, as the recovering market saw heightened demand. The most dramatic surge, however, occurred post-<strong>COVID-19 pandemic</strong>, driven by low interest rates and increased demand for living spaces, pushing prices to unprecedented levels. This escalating cost, particularly in major urban centers where many immigrants settle, often hinders successful integration"
     );
 
-
     insertFooter(container, {
         textHtml: "Provinces preselected based on recent high migration inflows: British Columbia, Quebec, and Ontario. <strong>Toggle</strong> to compare housing price trends across different provinces. <strong>Hover</strong> to see details for each year",
         sources: ["Statistics Canada, <i>Estimates of demographic growth components (annual)</i>"]
     });
-
 
     const containerNode = container.node();
     const containerWidth = containerNode.clientWidth;
@@ -42,16 +40,16 @@ function renderScene2(container, annotation, allData) {
         return { year, avg: d3.mean(yearData, d => +d.AveragePrice_CAD) };
     });
 
-    checkboxContainer = container.insert("div", ":first-child")
+    scene2_checkboxContainer = container.insert("div", ":first-child")
         .attr("id", "province-selector");
 
-    checkboxContainer.append("span")
+    scene2_checkboxContainer.append("span")
         .attr("id", "province-selector-title")
         .text("Select Provinces:");
 
     provinces.forEach(prov => {
         const id = `checkbox-${prov.replace(/\s+/g, '-')}`;
-        const label = checkboxContainer.append("label")
+        const label = scene2_checkboxContainer.append("label")
             .style("display", "flex")
             .style("align-items", "center")
             .style("margin", "8px 0")
@@ -79,24 +77,26 @@ function renderScene2(container, annotation, allData) {
             .text(prov);
     });
 
-    checkboxContainer.selectAll("input[type=checkbox]").on("change", updateLines);
+    scene2_checkboxContainer.selectAll("input[type=checkbox]").on("change", scene2_updateLines);
 
-    drawScene2Chart(container, margin, data, years, maxPrice, averageByYear, color, provinces, topProvinces);
+    scene2_drawChart(container, margin, data, years, maxPrice, averageByYear, color, provinces, topProvinces);
 
-    hasRenderedScene2 = true;
+    scene2_hasRendered = true;
 
-    window.addEventListener("resize", () => {
-        drawScene2Chart(container, margin, data, years, maxPrice, averageByYear, color, provinces, topProvinces);
-        updateLines();
-    });
+    window.addEventListener("resize", scene2_onResize);
 
     annotation.text("Housing prices have increased consistently over the past two decades, with significant variations across provinces.");
 }
 
-function drawScene2Chart(container, margin, data, years, maxPrice, averageByYear, color, provinces, topProvinces) {
+function scene2_onResize() {
+    scene2_drawChart(container, margin, data, years, maxPrice, averageByYear, color, provinces, topProvinces);
+    scene2_updateLines();
+}
+
+function scene2_drawChart(container, margin, data, years, maxPrice, averageByYear, color, provinces, topProvinces) {
     container.select("svg").remove();
-    visibleLines.clear();
-    selectedProvinces.clear();
+    scene2_visibleLines.clear();
+    scene2_selectedProvinces.clear();
 
     const containerNode = container.node();
     const containerWidth = containerNode.clientWidth - 280;
@@ -105,23 +105,23 @@ function drawScene2Chart(container, margin, data, years, maxPrice, averageByYear
     const width = containerWidth - margin.left - margin.right + (!isWide ? 100 : 0);
     const height = containerHeight - margin.top - margin.bottom;
 
-    svg = container.append("svg")
+    scene2_svg = container.append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + 100)
         .style("font-family", "sans-serif")
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    y = d3.scaleLinear().domain([0, maxPrice * 1.1]).range([height, 0]);
-    x = d3.scaleLinear().domain(d3.extent(years)).range([0, width]);
+    scene2_y = d3.scaleLinear().domain([0, maxPrice * 1.1]).range([height, 0]);
+    scene2_x = d3.scaleLinear().domain(d3.extent(years)).range([0, width]);
 
-    xAxis = d3.axisBottom(x).ticks(5).tickFormat(d3.format("d"));
-    yAxis = d3.axisLeft(y).ticks(6).tickFormat(d => d / 1000 + "k");
+    scene2_xAxis = d3.axisBottom(scene2_x).ticks(5).tickFormat(d3.format("d"));
+    scene2_yAxis = d3.axisLeft(scene2_y).ticks(6).tickFormat(d => d / 1000 + "k");
 
-    svg.append("g").attr("class", "x-axis").attr("transform", `translate(0,${height})`).call(xAxis);
-    svg.append("g").attr("class", "y-axis").call(yAxis);
+    scene2_svg.append("g").attr("class", "x-axis").attr("transform", `translate(0,${height})`).call(scene2_xAxis);
+    scene2_svg.append("g").attr("class", "y-axis").call(scene2_yAxis);
 
-    svg.append("text")
+    scene2_svg.append("text")
         .attr("x", width / 2)
         .attr("y", height + 40)
         .attr("text-anchor", "middle")
@@ -130,7 +130,7 @@ function drawScene2Chart(container, margin, data, years, maxPrice, averageByYear
         .attr("font-weight", 500)
         .text("Year");
 
-    svg.append("text")
+    scene2_svg.append("text")
         .attr("transform", "rotate(-90)")
         .attr("x", -height / 2)
         .attr("y", -60)
@@ -140,9 +140,9 @@ function drawScene2Chart(container, margin, data, years, maxPrice, averageByYear
         .attr("font-weight", 500)
         .text("Average Price (CAD)");
 
-    const avgLine = d3.line().x(d => x(d.year)).y(d => y(d.avg));
+    const avgLine = d3.line().x(d => scene2_x(d.year)).y(d => scene2_y(d.avg));
 
-    svg.append("path")
+    scene2_svg.append("path")
         .datum(averageByYear)
         .attr("fill", "none")
         .attr("stroke", "black")
@@ -154,9 +154,9 @@ function drawScene2Chart(container, margin, data, years, maxPrice, averageByYear
     const lastAvg = averageByYear[averageByYear.length - 1];
 
     if (isWide) {
-        svg.append("text")
-            .attr("x", x(lastAvg.year) + 5)
-            .attr("y", y(lastAvg.avg) - 15)
+        scene2_svg.append("text")
+            .attr("x", scene2_x(lastAvg.year) + 5)
+            .attr("y", scene2_y(lastAvg.avg) - 15)
             .attr("fill", "black")
             .style("font-size", "12px")
             .text("National Average");
@@ -169,17 +169,17 @@ function drawScene2Chart(container, margin, data, years, maxPrice, averageByYear
 
     crisisYears.forEach(c => {
         if (c.year >= d3.min(years) && c.year <= d3.max(years)) {
-            svg.append("line")
-                .attr("x1", x(c.year))
-                .attr("x2", x(c.year))
+            scene2_svg.append("line")
+                .attr("x1", scene2_x(c.year))
+                .attr("x2", scene2_x(c.year))
                 .attr("y1", 0)
                 .attr("y2", height)
                 .attr("stroke", "gray")
                 .attr("stroke-dasharray", "4 4")
                 .attr("stroke-width", 1.5);
 
-            svg.append("text")
-                .attr("x", x(c.year) + 5)
+            scene2_svg.append("text")
+                .attr("x", scene2_x(c.year) + 5)
                 .attr("y", 15)
                 .attr("fill", "gray")
                 .style("font-size", "12px")
@@ -187,9 +187,9 @@ function drawScene2Chart(container, margin, data, years, maxPrice, averageByYear
         }
     });
 
-    tooltip = container.select(".tooltip");
-    if (tooltip.empty()) {
-        tooltip = container.append("div")
+    scene2_tooltip = container.select(".tooltip");
+    if (scene2_tooltip.empty()) {
+        scene2_tooltip = container.append("div")
             .attr("class", "tooltip")
             .style("position", "absolute")
             .style("background", "white")
@@ -201,19 +201,19 @@ function drawScene2Chart(container, margin, data, years, maxPrice, averageByYear
     }
 
     topProvinces.forEach(prov => {
-        drawProvince(prov, data, x, y, color);
-        selectedProvinces.add(prov);
+        scene2_drawProvince(prov, data, scene2_x, scene2_y, color);
+        scene2_selectedProvinces.add(prov);
     });
 }
 
-function drawProvince(prov, data, x, y, color) {
+function scene2_drawProvince(prov, data, x, y, color) {
     const provData = data.filter(d => d.Province === prov).sort((a, b) => a.Year - b.Year);
     const lineGen = d3.line()
         .defined(d => d.AveragePrice_CAD != null)
         .x(d => x(d.Year))
         .y(d => y(d.AveragePrice_CAD));
 
-    const group = svg.append("g").attr("class", "line-group").attr("data-prov", prov);
+    const group = scene2_svg.append("g").attr("class", "line-group").attr("data-prov", prov);
 
     const path = group.append("path")
         .datum(provData)
@@ -225,7 +225,7 @@ function drawProvince(prov, data, x, y, color) {
 
     const totalLength = path.node().getTotalLength();
 
-    if (!hasRenderedScene2) {
+    if (!scene2_hasRendered) {
         path.attr("stroke-dasharray", totalLength + " " + totalLength)
             .attr("stroke-dashoffset", totalLength)
             .transition().duration(1500).attr("stroke-dashoffset", 0);
@@ -247,8 +247,8 @@ function drawProvince(prov, data, x, y, color) {
         .attr("fill", color(prov))
         .attr("opacity", 0.9)
         .on("mouseover", (event, d) => {
-            tooltip.transition().duration(200).style("opacity", 1);
-            tooltip.html(`
+            scene2_tooltip.transition().duration(200).style("opacity", 1);
+            scene2_tooltip.html(`
                 <strong>${d.Province}</strong><br/>
                 Year: ${d.Year}<br/>
                 Price: $${d.AveragePrice_CAD.toLocaleString()}
@@ -257,10 +257,10 @@ function drawProvince(prov, data, x, y, color) {
                 .style("top", (event.pageY - 28) + "px");
         })
         .on("mouseout", () => {
-            tooltip.transition().duration(500).style("opacity", 0);
+            scene2_tooltip.transition().duration(500).style("opacity", 0);
         });
 
-    if (!hasRenderedScene2) {
+    if (!scene2_hasRendered) {
         circles.transition()
             .delay((d, i) => i * delayPerPoint)
             .duration(200)
@@ -269,37 +269,37 @@ function drawProvince(prov, data, x, y, color) {
         circles.attr("r", 4);
     }
 
-    visibleLines.set(prov, group);
+    scene2_visibleLines.set(prov, group);
 }
 
-function removeProvince(prov) {
-    if (visibleLines.has(prov)) {
-        visibleLines.get(prov)
+function scene2_removeProvince(prov) {
+    if (scene2_visibleLines.has(prov)) {
+        scene2_visibleLines.get(prov)
             .transition()
             .duration(500)
             .style("opacity", 0)
             .remove();
-        visibleLines.delete(prov);
+        scene2_visibleLines.delete(prov);
     }
 }
 
-function updateLines() {
+function scene2_updateLines() {
     const checked = [];
-    checkboxContainer.selectAll("input[type=checkbox]").each(function () {
+    scene2_checkboxContainer.selectAll("input[type=checkbox]").each(function () {
         if (this.checked) checked.push(this.value);
     });
 
     checked.forEach(prov => {
-        if (!selectedProvinces.has(prov)) {
-            drawProvince(prov, data, x, y, color);
-            selectedProvinces.add(prov);
+        if (!scene2_selectedProvinces.has(prov)) {
+            scene2_drawProvince(prov, data, scene2_x, scene2_y, color);
+            scene2_selectedProvinces.add(prov);
         }
     });
 
-    Array.from(selectedProvinces).forEach(prov => {
+    Array.from(scene2_selectedProvinces).forEach(prov => {
         if (!checked.includes(prov)) {
-            removeProvince(prov);
-            selectedProvinces.delete(prov);
+            scene2_removeProvince(prov);
+            scene2_selectedProvinces.delete(prov);
         }
     });
 }

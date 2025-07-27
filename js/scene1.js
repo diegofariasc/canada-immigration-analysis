@@ -1,18 +1,21 @@
-let hasRenderedScene1 = false;
-let selectedYear;
-let tooltip;
-let annotationGlobal, containerGlobal, dataGlobal, provincesGlobal;
+let scene1_hasRendered = false;
+let scene1_selectedYear;
+let scene1_tooltip;
+let scene1_annotationGlobal;
+let scene1_containerGlobal;
+let scene1_dataGlobal;
+let scene1_provincesGlobal;
 
-const provinces = [
+const scene1_provinces = [
     "Newfoundland and Labrador", "Prince Edward Island", "Nova Scotia", "New Brunswick",
     "Quebec", "Ontario", "Manitoba", "Saskatchewan", "Alberta", "British Columbia",
     "Yukon", "Northwest Territories", "Nunavut"
 ];
 
-function renderScene1(container, annotation, allData) {
+function scene1_render(container, annotation, allData) {
     const data = allData.immigrationData;
     data.forEach(d => {
-        d.totalImmigrants = provinces.reduce((sum, p) => sum + (+d[p] || 0), 0);
+        d.totalImmigrants = scene1_provinces.reduce((sum, p) => sum + (+d[p] || 0), 0);
     });
 
     container.selectAll("*").remove();
@@ -23,7 +26,7 @@ function renderScene1(container, annotation, allData) {
         "Canada has consistently welcomed a growing number of immigrants since 1991, with a notable peak in <strong>2021 and 2022</strong>. The <em>Express Entry</em> system, introduced in 2015, streamlined skilled worker applications, while additional pathways—such as one that granted permanent status to temporary residents—helped attract and retain talent already in the country. This upward trend, visible in the bar chart, reflects the government's broader commitment to immigration as a key driver of economic growth"
     );
 
-    tooltip = container.append("div")
+    scene1_tooltip = container.append("div")
         .style("position", "absolute")
         .style("pointer-events", "none")
         .style("background", "rgba(0,0,0,0.7)")
@@ -33,24 +36,23 @@ function renderScene1(container, annotation, allData) {
         .style("font-size", "12px")
         .style("visibility", "hidden");
 
-    annotationGlobal = annotation;
-    containerGlobal = container;
-    dataGlobal = data;
-    provincesGlobal = provinces;
-    selectedYear = data[data.length - 1].Year;
+    scene1_annotationGlobal = annotation;
+    scene1_containerGlobal = container;
+    scene1_dataGlobal = data;
+    scene1_provincesGlobal = scene1_provinces;
+    scene1_selectedYear = data[data.length - 1].Year;
 
-    drawScene1Chart();
+    scene1_drawChart();
 
-    window.addEventListener("resize", drawScene1Chart);
+    window.addEventListener("resize", scene1_drawChart);
 }
 
-function drawScene1Chart() {
-    const container = containerGlobal;
-    const data = dataGlobal;
-    const annotation = annotationGlobal;
+function scene1_drawChart() {
+    const container = scene1_containerGlobal;
+    const data = scene1_dataGlobal;
+    const annotation = scene1_annotationGlobal;
 
     container.select("svg")?.remove();
-
     const margin = { top: 0, right: 40, bottom: 60, left: 80 };
     const containerNode = container.node();
     const containerWidth = containerNode.clientWidth;
@@ -104,8 +106,6 @@ function drawScene1Chart() {
         .attr("y", barHeight + 50)
         .attr("text-anchor", "middle")
         .attr("font-size", "12px")
-        .attr("font-family", "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif")
-        .attr("font-weight", 500)
         .attr("fill", "#333")
         .text("Year");
 
@@ -117,13 +117,10 @@ function drawScene1Chart() {
         .attr("y", -yAxisBBox.width - 20)
         .attr("text-anchor", "middle")
         .attr("font-size", "12px")
-        .attr("font-family", "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif")
-        .attr("font-weight", 500)
         .attr("fill", "#333")
         .text("Total Immigrants");
 
     const barsGroup = barGroup.append("g");
-
     const barColor = "#555555";
     const barSelectedColor = "#f57c00";
 
@@ -136,31 +133,31 @@ function drawScene1Chart() {
         .attr("y", barHeight)
         .attr("width", x.bandwidth())
         .attr("height", 0)
-        .attr("fill", d => d.Year === selectedYear ? barSelectedColor : barColor)
+        .attr("fill", d => d.Year === scene1_selectedYear ? barSelectedColor : barColor)
         .style("cursor", "pointer")
         .on("click", (event, d) => {
-            selectedYear = d.Year;
-            updateBars(bars, barColor, barSelectedColor);
-            if (container.node().clientWidth >= 400) updatePieChart(pieGroup, pieRadius);
-            annotation.text(`Selected Year: ${selectedYear}. Immigration totals shown in bar and distribution by province in pie chart.`);
+            scene1_selectedYear = d.Year;
+            scene1_updateBars(bars, barColor, barSelectedColor);
+            if (container.node().clientWidth >= 400) scene1_updatePieChart(pieGroup, pieRadius);
+            annotation.text(`Selected Year: ${scene1_selectedYear}. Immigration totals shown in bar and distribution by province in pie chart.`);
         })
         .on("mouseover", (event, d) => {
-            d3.select(event.currentTarget).attr("fill", d.Year === selectedYear ? d3.color(barSelectedColor).brighter(0.7) : d3.color(barColor).brighter(1));
-            tooltip.style("visibility", "visible")
+            d3.select(event.currentTarget).attr("fill", d.Year === scene1_selectedYear ? d3.color(barSelectedColor).brighter(0.7) : d3.color(barColor).brighter(1));
+            scene1_tooltip.style("visibility", "visible")
                 .html(`<strong>Year:</strong> ${d.Year}<br><strong>Total immigrants:</strong> ${d.totalImmigrants.toLocaleString()}`)
                 .style("top", (event.pageY - 40) + "px")
                 .style("left", (event.pageX + 10) + "px");
         })
         .on("mousemove", (event) => {
-            tooltip.style("top", (event.pageY - 40) + "px")
+            scene1_tooltip.style("top", (event.pageY - 40) + "px")
                 .style("left", (event.pageX + 10) + "px");
         })
         .on("mouseout", (event, d) => {
-            d3.select(event.currentTarget).attr("fill", d.Year === selectedYear ? barSelectedColor : barColor);
-            tooltip.style("visibility", "hidden");
+            d3.select(event.currentTarget).attr("fill", d.Year === scene1_selectedYear ? barSelectedColor : barColor);
+            scene1_tooltip.style("visibility", "hidden");
         });
 
-    if (!hasRenderedScene1) {
+    if (!scene1_hasRendered) {
         bars.transition()
             .duration(800)
             .delay((d, i) => i * 30)
@@ -171,25 +168,20 @@ function drawScene1Chart() {
             .attr("height", d => Math.max(0, barHeight - y(d.totalImmigrants)));
     }
 
-    drawTrendLine(barGroup, x, y);
-
-    if (isWide) {
-        updatePieChart(pieGroup, pieRadius);
-    }
-
-    hasRenderedScene1 = true;
+    scene1_drawTrendLine(barGroup, x, y);
+    if (isWide) scene1_updatePieChart(pieGroup, pieRadius);
+    scene1_hasRendered = true;
 }
 
-function updateBars(bars, barColor, selectedColor) {
-    bars.attr("fill", d => d.Year === selectedYear ? selectedColor : barColor);
+function scene1_updateBars(bars, barColor, selectedColor) {
+    bars.attr("fill", d => d.Year === scene1_selectedYear ? selectedColor : barColor);
 }
 
-function drawTrendLine(group, x, y) {
-    const data = dataGlobal;
+function scene1_drawTrendLine(group, x, y) {
+    const data = scene1_dataGlobal;
     const xVals = data.map(d => d.Year);
     const yVals = data.map(d => d.totalImmigrants);
     const n = data.length;
-
     const sumX = d3.sum(xVals);
     const sumY = d3.sum(yVals);
     const sumXY = d3.sum(data, d => d.Year * d.totalImmigrants);
@@ -218,7 +210,7 @@ function drawTrendLine(group, x, y) {
     path.attr("stroke-dasharray", `${totalLength} ${totalLength}`)
         .attr("stroke-dashoffset", totalLength);
 
-    if (!hasRenderedScene1) {
+    if (!scene1_hasRendered) {
         path.transition()
             .delay(data.length * 30 + 200)
             .duration(1500)
@@ -229,15 +221,15 @@ function drawTrendLine(group, x, y) {
     }
 }
 
-function updatePieChart(pieGroup, pieRadius) {
-    const data = dataGlobal;
-    const provinces = provincesGlobal;
+function scene1_updatePieChart(pieGroup, pieRadius) {
+    const data = scene1_dataGlobal;
+    const provinces = scene1_provincesGlobal;
     const color = d3.scaleOrdinal().domain(provinces).range(d3.schemeSet3);
     const pie = d3.pie().value(d => d.value).sort(null);
     const arc = d3.arc().innerRadius(0).outerRadius(pieRadius);
     const outerArc = d3.arc().innerRadius(pieRadius * 1.1).outerRadius(pieRadius * 1.1);
 
-    const row = data.find(d => +d.Year === +selectedYear);
+    const row = data.find(d => +d.Year === +scene1_selectedYear);
     const pieDataRaw = provinces.map(p => ({ province: p, value: row && row[p] ? +row[p] : 0 }));
     const total = d3.sum(pieDataRaw, d => d.value);
     const threshold = total * 0.05;
@@ -316,7 +308,7 @@ function updatePieChart(pieGroup, pieRadius) {
 
     paths.exit().remove();
 
-    if (!hasRenderedScene1) {
+    if (!scene1_hasRendered) {
         labelsGroup.selectAll("text")
             .data(arcs, d => d.data.province)
             .join(

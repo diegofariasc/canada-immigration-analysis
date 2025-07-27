@@ -11,11 +11,10 @@ const introWrapper = d3.select("#intro-content-wrapper");
 const vizWrapper = d3.select("#visualization-content-wrapper");
 
 function loadScene(index, allData) {
-    hasRenderedScene1 = false;
-    hasRenderedScene2 = false;
-    window
-        .removeEventListener("resize", drawScene1Chart);
-    window.removeEventListener("resize", drawScene1Chart);
+    scene1_hasRendered = false;
+    scene2_hasRendered = false;
+    window.removeEventListener("resize", scene1_drawChart);
+    window.removeEventListener("resize", scene2_onResize);
 
     container.selectAll("svg").remove();
     container.selectAll("div.chart").remove();
@@ -24,11 +23,11 @@ function loadScene(index, allData) {
 
     currentSceneIndex = index;
 
-    const sceneFunction = window[`renderScene${index + 1}`];
+    const sceneFunction = window[`scene${index + 1}_render`];
     if (typeof sceneFunction === "function") {
         sceneFunction(container, annotation, allData);
     } else {
-        console.error(`renderScene${index + 1} is not defined`);
+        console.error(`scene${index + 1}_render is not defined`);
     }
 
     prevBtn.property("disabled", currentSceneIndex === 0);
