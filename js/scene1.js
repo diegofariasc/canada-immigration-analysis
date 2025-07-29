@@ -53,7 +53,7 @@ function scene1_drawChart() {
     const annotation = scene1_annotationGlobal;
 
     container.select("svg")?.remove();
-    const margin = { top: 0, right: 40, bottom: 60, left: 80 };
+    const margin = { top: 25, right: 40, bottom: 60, left: 80 };
     const containerNode = container.node();
     const containerWidth = containerNode.clientWidth;
     const isWide = containerWidth > 600;
@@ -67,10 +67,10 @@ function scene1_drawChart() {
 
     const containerHeight = containerNode.clientHeight;
     const barWidth = isWide
-        ? (containerWidth * 0.6 - margin.left - margin.right - 40)
+        ? (containerWidth * 0.7 - margin.left - margin.right - 40)
         : (containerWidth - margin.left - margin.right);
     const barHeight = containerHeight - margin.top - margin.bottom;
-    const pieRadius = Math.min(containerHeight, (containerWidth - 70) * 0.3) / 3;
+    const pieRadius = Math.min(containerHeight, (containerWidth - 70) * 0.25) / 3;
 
     const svg = container.append("svg")
         .attr("width", containerWidth)
@@ -80,7 +80,7 @@ function scene1_drawChart() {
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
     const pieGroup = svg.append("g")
-        .attr("transform", `translate(${isWide ? (barWidth + margin.left + pieRadius * 1.2 + 130) : containerWidth / 2},${isWide ? (margin.top + barHeight / 2) : (barHeight + margin.top + margin.bottom + pieRadius)})`);
+        .attr("transform", `translate(${isWide ? (barWidth + margin.left + pieRadius * 1.2 + 110) : containerWidth / 2},${isWide ? (margin.top + barHeight / 2) : (barHeight + margin.top + margin.bottom + pieRadius)})`);
 
     const x = d3.scaleBand()
         .domain(data.map(d => d.Year))
@@ -173,7 +173,67 @@ function scene1_drawChart() {
     }
 
     scene1_drawTrendLine(barGroup, x, y);
-    if (isWide) scene1_updatePieChart(pieGroup, pieRadius);
+
+    if (isWide) {
+        scene1_updatePieChart(pieGroup, pieRadius)
+    };
+
+    const annotations = [
+        {
+            note: {
+                label: "Immigration hit a major peak",
+                title: "2021-2022 Spike",
+                wrap: 160,
+                align: "right",
+            },
+            dx: -30,
+            dy: -10,
+            subject: { radius: 4 },
+            x: x("2021") + x.bandwidth() / 2 + margin.left,
+            y: y(data.find(d => d.Year === "2021").totalImmigrants) + margin.top
+        },
+        {
+            note: {
+                label: "Express Entry program launched",
+                title: "2015 policy shift",
+                wrap: 160,
+                align: "right",
+            },
+            dx: 0,
+            dy: -30,
+            subject: { radius: 4 },
+            x: x("2015") + x.bandwidth() / 2 + margin.left,
+            y: y(data.find(d => d.Year === "2015").totalImmigrants) + margin.top
+        }
+    ];
+
+    const makeAnnotations = d3.annotation()
+        .type(d3.annotationCalloutCircle)
+        .annotations(annotations);
+
+    if (!scene1_hasRendered) {
+        const annotationGroup = svg.append("g")
+            .attr("class", "annotations")
+            .style("font-size", "11px")
+            .style("opacity", 0)
+            .attr("transform", "translate(0, 20)")
+            .call(makeAnnotations);
+
+        annotationGroup.transition()
+            .delay(1000)
+            .duration(800)
+            .ease(d3.easeCubicOut)
+            .style("opacity", 1)
+            .attr("transform", "translate(0, 0)");
+
+        scene1_hasRendered = true;
+    } else {
+        svg.append("g")
+            .attr("class", "annotations")
+            .style("font-size", "11px")
+            .call(makeAnnotations);
+    }
+
     scene1_hasRendered = true;
 }
 
