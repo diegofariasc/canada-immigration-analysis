@@ -13,7 +13,7 @@ function scene4_render(container, annotation, allData) {
     scene4_annotation = annotation;
     scene4_data = allData;
 
-    requestIdleCallback(scene4_updateChart, { timeout: 1000 });
+    requestIdleCallback(scene4_updateChart, { timeout: 300 });
     window.addEventListener("resize", scene4_debouncedRedraw);
 }
 
