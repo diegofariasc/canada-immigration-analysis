@@ -10,15 +10,23 @@ const backToIntroBtn = d3.select("#back-to-intro-btn");
 const introWrapper = d3.select("#intro-content-wrapper");
 const vizWrapper = d3.select("#visualization-content-wrapper");
 
+const sceneButtons = [
+    d3.select("#scene-1-btn"),
+    d3.select("#scene-2-btn"),
+    d3.select("#scene-3-btn"),
+    d3.select("#scene-4-btn")
+];
+
 function loadScene(index, allData) {
     scene1_hasRendered = false;
     scene2_hasRendered = false;
     scene3_hasRendered = false;
     scene4_hasRendered = false;
 
-    window.removeEventListener("resize", scene1_drawChart);
-    window.removeEventListener("resize", scene2_onResize);
-    window.removeEventListener("resize", scene3_draw);
+    window.removeEventListener("resize", scene1_debouncedRedraw);
+    window.removeEventListener("resize", scene2_debouncedRedraw);
+    window.removeEventListener("resize", scene3_debouncedRedraw);
+    window.removeEventListener("resize", scene4_debouncedRedraw);
 
     container.selectAll("svg").remove();
     container.selectAll("div.chart").remove();
@@ -36,6 +44,7 @@ function loadScene(index, allData) {
 
     prevBtn.property("disabled", currentSceneIndex === 0);
     nextBtn.property("disabled", currentSceneIndex === 3);
+    sceneButtons.forEach((btn, i) => btn.property("disabled", i === currentSceneIndex));
 }
 
 Promise.all([
@@ -133,4 +142,23 @@ nextBtn.on("click", async () => {
         await waitMs(500)
         vizWrapper.attr("class", "content-wrapper visible");
     }
+});
+
+sceneButtons.forEach((btn, index) => {
+    btn.on("click", async () => {
+        if (index === currentSceneIndex || !savedAllData) return;
+        sceneButtons.forEach((b, i) => b.property("disabled", i === index));
+
+        const isForward = index > currentSceneIndex;
+        const exitClass = isForward ? "disappear-to-left" : "disappear-to-right";
+        const enterClass = isForward ? "appear-from-right" : "appear-from-left";
+
+        vizWrapper.attr("class", `content-wrapper ${exitClass}`);
+        await waitMs(250);
+
+        vizWrapper.attr("class", `content-wrapper ${enterClass}`);
+        loadScene(index, savedAllData);
+        await waitMs(500);
+        vizWrapper.attr("class", "content-wrapper visible");
+    });
 });

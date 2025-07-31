@@ -3,10 +3,11 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Narrative Visualization - Immigration in Canada</title>
+    <title>Narrative Visualization: Welcome to Canada? - A story of opportunity and obstacles</title>
     <link rel="stylesheet" href="css/styles.css" />
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://unpkg.com/topojson-client@3"></script>
+    <script src="https://unpkg.com/d3-svg-annotation@2.5.1/d3-annotation.min.js"></script>
 </head>
 
 <body>
@@ -56,11 +57,15 @@
                     <div id="annotation"></div>
                 </div>
                 <div id="controls">
-                    <div>
+                    <div class="restart-buttons">
                         <button id="back-to-intro-btn" title="Restart">&#10227;</button>
                     </div>
-                    <div>
+                    <div class="slide-buttons">
                         <button id="prev-btn" title="Previous" disabled>&#x25C0;</button>
+                        <button id="scene-1-btn" title="Go to scene 1">1</button>
+                        <button id="scene-2-btn" title="Go to scene 2">2</button>
+                        <button id="scene-3-btn" title="Go to scene 3">3</button>
+                        <button id="scene-4-btn" title="Go to scene 4">4</button>
                         <button id="next-btn" title="Next">&#x25B6;</button>
                     </div>
                 </div>

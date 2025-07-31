@@ -44,8 +44,10 @@ function scene1_render(container, annotation, allData) {
 
     scene1_drawChart();
 
-    window.addEventListener("resize", scene1_drawChart);
+    window.addEventListener("resize", scene1_debouncedRedraw);
 }
+
+const scene1_debouncedRedraw = debounce(scene1_drawChart, DEBOUNCE_TIMEOUT);
 
 function scene1_drawChart() {
     const container = scene1_containerGlobal;
@@ -163,8 +165,8 @@ function scene1_drawChart() {
 
     if (!scene1_hasRendered) {
         bars.transition()
-            .duration(800)
-            .delay((d, i) => i * 30)
+            .duration(500)
+            .delay((d, i) => i * 20)
             .attr("y", d => y(d.totalImmigrants))
             .attr("height", d => Math.max(0, barHeight - y(d.totalImmigrants)));
     } else {
@@ -181,6 +183,19 @@ function scene1_drawChart() {
     const annotations = [
         {
             note: {
+                label: "Express Entry program launched",
+                title: "2015 Policy shift",
+                wrap: 160,
+                align: "right",
+            },
+            dx: 0,
+            dy: -30,
+            subject: { radius: 4 },
+            x: x("2015") + x.bandwidth() / 2 + margin.left,
+            y: y(data.find(d => d.Year === "2015").totalImmigrants) + margin.top
+        },
+        {
+            note: {
                 label: "Immigration hit a major peak",
                 title: "2021-2022 Spike",
                 wrap: 160,
@@ -192,48 +207,34 @@ function scene1_drawChart() {
             x: x("2021") + x.bandwidth() / 2 + margin.left,
             y: y(data.find(d => d.Year === "2021").totalImmigrants) + margin.top
         },
-        {
-            note: {
-                label: "Express Entry program launched",
-                title: "2015 policy shift",
-                wrap: 160,
-                align: "right",
-            },
-            dx: 0,
-            dy: -30,
-            subject: { radius: 4 },
-            x: x("2015") + x.bandwidth() / 2 + margin.left,
-            y: y(data.find(d => d.Year === "2015").totalImmigrants) + margin.top
-        }
     ];
 
     const makeAnnotations = d3.annotation()
-        .type(d3.annotationCalloutCircle)
+        .type(d3.annotationCallout)
         .annotations(annotations);
 
     if (!scene1_hasRendered) {
-        const annotationGroup = svg.append("g")
-            .attr("class", "annotations")
-            .style("font-size", "11px")
-            .style("opacity", 0)
-            .attr("transform", "translate(0, 20)")
-            .call(makeAnnotations);
+        annotations.forEach((a, i) => {
+            const group = svg.append("g")
+                .attr("class", "annotation")
+                .style("font-size", "11px")
+                .style("opacity", 0)
+                .attr("transform", "translate(0, 20)")
+                .call(d3.annotation().type(d3.annotationCallout).annotations([a]));
 
-        annotationGroup.transition()
-            .delay(1000)
-            .duration(800)
-            .ease(d3.easeCubicOut)
-            .style("opacity", 1)
-            .attr("transform", "translate(0, 0)");
-
-        scene1_hasRendered = true;
+            group.transition()
+                .delay(700 + i * 250)
+                .duration(800)
+                .ease(d3.easeCubicOut)
+                .style("opacity", 1)
+                .attr("transform", "translate(0, 0)");
+        });
     } else {
         svg.append("g")
-            .attr("class", "annotations")
+            .attr("class", "annotation")
             .style("font-size", "11px")
             .call(makeAnnotations);
     }
-
     scene1_hasRendered = true;
 }
 
@@ -387,8 +388,7 @@ function scene1_updatePieChart(pieGroup, pieRadius) {
             .join(
                 enter => enter.append("text")
                     .attr("font-size", "11px")
-                    .attr("alignment-baseline", "middle")
-                    .attr("fill", "#333"),
+                    .attr("alignment-baseline", "middle"),
                 update => update,
                 exit => exit.remove()
             )

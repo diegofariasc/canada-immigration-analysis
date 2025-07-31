@@ -67,3 +67,17 @@ function filterPolygonsByLat(feature) {
     }
     return feature;
 }
+
+function getPriceAtYear(year, province = null) {
+    const values = savedAllData.housingData.filter(d => d.Year === year && (!province || d.Province === province));
+    if (!values.length) return null;
+    return d3.mean(values, d => +d.AveragePrice_CAD);
+}
+
+function debounce(func, delay) {
+    let timeout;
+    return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), delay);
+    };
+}

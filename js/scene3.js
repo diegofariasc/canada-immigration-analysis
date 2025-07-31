@@ -6,7 +6,7 @@ let scene3_globalContainer;
 function scene3_render(container, _, allData) {
     scene3_data = allData.unemploymentData;
     scene3_globalContainer = container;
-    scene3_margin = { top: 60, right: 200, bottom: 60, left: 80 };
+    scene3_margin = { top: 60, right: 80, bottom: 60, left: 80 };
 
     insertTitleAndDescription(
         container,
@@ -21,9 +21,10 @@ function scene3_render(container, _, allData) {
 
     scene3_draw(container);
     scene3_hasRendered = true;
-    window.addEventListener("resize", scene3_draw);
+    window.addEventListener("resize", scene3_debouncedRedraw);
 }
 
+const scene3_debouncedRedraw = debounce(scene3_draw, DEBOUNCE_TIMEOUT);
 
 function scene3_draw() {
     scene3_globalContainer.selectAll("svg").remove();
@@ -34,7 +35,7 @@ function scene3_draw() {
     const containerHeight = containerNode.clientHeight;
     const isHighEnough = containerHeight >= 260;
 
-    const width = containerWidth - scene3_margin.left - scene3_margin.right + (isHighEnough ? 0 : 140);
+    const width = containerWidth - scene3_margin.left - scene3_margin.right + (isHighEnough ? 0 : 20);
     const height = containerHeight - scene3_margin.top - scene3_margin.bottom;
 
     const svg = scene3_globalContainer.append("svg")
@@ -53,21 +54,16 @@ function scene3_draw() {
 
     scene3_drawAxes(svg, x, y, width, height);
 
-    const scene3_color = d3.scaleOrdinal().domain(scene3_data.map(d => d.Province)).range(d3.schemeTableau10);
     const scene3_tooltip = scene3_createTooltip(scene3_globalContainer);
 
     scene3_drawAverageLine(svg, scene3_data, y, width);
+    scene3_drawAnnotations(svg, x, y);
 
-    const ontario = scene3_data.find(d => d.Province === "Ontario");
-    if (ontario) {
-        scene3_drawOntarioAnnotation(svg, ontario, x, y);
-    }
-
-    const scene3_points = scene3_drawPoints(svg, scene3_data, x, y, scene3_color, height, scene3_tooltip);
+    const scene3_points = scene3_drawPoints(svg, x, height, scene3_tooltip);
 
     if (!scene3_hasRendered) {
         scene3_points.transition()
-            .delay((d, i) => i * 100)
+            .delay((_, i) => i * 100)
             .duration(800)
             .attr("cy", d => y(d["Unemployment rate"]))
             .attr("opacity", 1);
@@ -78,7 +74,7 @@ function scene3_draw() {
     }
 
     if (isHighEnough) {
-        scene3_drawLegend(svg, scene3_data, scene3_color, width, containerHeight);
+        scene3_drawLegend(svg, width, containerHeight);
     }
 }
 
@@ -124,15 +120,15 @@ function scene3_createTooltip(container) {
         .style("color", "white");
 }
 
-function scene3_drawPoints(svg, data, x, _, color, height, tooltip) {
+function scene3_drawPoints(svg, x, height, tooltip) {
     return svg.selectAll("circle")
-        .data(data)
+        .data(scene3_data)
         .enter()
         .append("circle")
         .attr("cx", d => x(d["Number of immigrants"]))
         .attr("cy", height)
         .attr("r", 6)
-        .attr("fill", d => color(d.Province))
+        .attr("fill", d => provincesColorPalette[d.Province])
         .attr("opacity", 0)
         .attr("cursor", "pointer")
         .on("mouseover", (event, d) => {
@@ -159,26 +155,25 @@ function scene3_drawPoints(svg, data, x, _, color, height, tooltip) {
         });
 }
 
-function scene3_drawLegend(svg, data, color, width, height) {
-    const uniqueProvinces = [...new Set(data.map(d => d.Province))];
+function scene3_drawLegend(svg, width, height) {
 
     const legend = svg.append("g")
         .attr("transform", `translate(${width + 20}, ${-60 + (height - 260) / 2})`);
 
-    uniqueProvinces.forEach((province, i) => {
+    Object.keys(provinceAbbreviation).forEach((province, i) => {
         const g = legend.append("g")
             .attr("transform", `translate(0, ${i * 20})`);
 
         g.append("rect")
             .attr("width", 12)
             .attr("height", 12)
-            .attr("fill", color(province));
+            .attr("fill", provincesColorPalette[province]);
 
         g.append("text")
             .attr("x", 18)
             .attr("y", 10)
             .attr("font-size", "11px")
-            .text(province);
+            .text(provinceAbbreviation[province]);
     });
 }
 
@@ -202,37 +197,64 @@ function scene3_drawAverageLine(svg, data, y, width) {
         .text(`Average: ${mean.toFixed(1)}%`);
 }
 
-function scene3_drawOntarioAnnotation(svg, ontario, x, y) {
-    const ox = x(ontario["Number of immigrants"]);
-    const oy = y(ontario["Unemployment rate"]);
+function scene3_drawAnnotations(svg, x, y) {
+    const ontario = scene3_data.find(d => d.Province === "Ontario");
+    const quebec = scene3_data.find(d => d.Province === "Quebec");
 
-    const line = svg.append("line")
-        .attr("x1", ox)
-        .attr("y1", oy)
-        .attr("x2", ox - 80)
-        .attr("y2", oy - 50)
-        .attr("stroke", "gray")
-        .attr("stroke-width", 1.5)
-        .attr("stroke-dasharray", "4 2")
-        .style("opacity", scene3_hasRendered ? 1 : 0);
+    const annotations = [
+        {
+            note: {
+                title: "Ontario's Newcomer Job Challenge",
+                label: "Ontario has the most immigrants but one of the highest unemployment rates. In 2023, about 34,819 new immigrants ended up unemployed",
+                wrap: 240,
+                align: "right"
+            },
+            x: x(ontario["Number of immigrants"]),
+            y: y(ontario["Unemployment rate"]),
+            dx: -10,
+            dy: -20,
+            subject: {
+                radius: 6,
+                radiusPadding: 3
+            }
+        },
+        {
+            note: {
+                title: "Quebec reduces support services",
+                label: "Quebec restricts PR access to employment services, raising newcomer unemployment ~10%",
+                wrap: 240,
+                align: "right"
+            },
+            x: x(quebec["Number of immigrants"]),
+            y: y(quebec["Unemployment rate"]),
+            dx: -10,
+            dy: 40,
+            subject: {
+                radius: 6,
+                radiusPadding: 3
+            }
+        },
+    ];
+
+    const group = svg.append("g")
+        .attr("class", "annotation-group")
+        .style("font-size", "11px")
+        .style("font-family", "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif")
+        .style("opacity", !scene3_hasRendered ? 0 : 1)
+        .attr("transform", !scene3_hasRendered ? "translate(0,20)" : "translate(0,0)");
+
+    group.call(
+        d3.annotation()
+            .type(d3.annotationCallout)
+            .annotations(annotations)
+    );
 
     if (!scene3_hasRendered) {
-        line.transition().delay(1600).duration(600).style("opacity", 1);
+        group.transition()
+            .delay(1500)
+            .duration(800)
+            .ease(d3.easeCubicOut)
+            .style("opacity", 1)
+            .attr("transform", "translate(0,0)");
     }
-
-    const text = svg.append("text")
-        .attr("x", ox - 85)
-        .attr("y", oy - 60)
-        .attr("fill", "gray")
-        .attr("font-size", "12px")
-        .attr("text-anchor", "end")
-        .style("opacity", scene3_hasRendered ? 1 : 0);
-
-    if (!scene3_hasRendered) {
-        text.transition().delay(1600).duration(600).style("opacity", 1);
-    }
-
-    text.text("Ontario has the most immigrants but also one of the")
-        .append("tspan").attr("x", ox - 85).attr("dy", "1.2em").text("highest unemployment rates. In 2023, around 34,819")
-        .append("tspan").attr("x", ox - 85).attr("dy", "1.2em").text("newly-admitted immigrants ended up unemployed");
 }

@@ -124,12 +124,19 @@ body {
 }
 
 .content-wrapper h1 {
-    font-size: 2.5em;
     color: #1a237e;
     text-align: center;
     line-height: 1.2;
     font-weight: 700;
     margin: 0;
+}
+
+.content-wrapper:not(#intro-content-wrapper) h1 {
+    font-size: 1.5rem;
+}
+
+#intro-content-wrapper h1 {
+    font-size: 2.5rem;
 }
 
 .content-wrapper h2 {
@@ -140,7 +147,14 @@ body {
 }
 
 .content-wrapper p {
-    margin-bottom: 15px;
+    margin-bottom: 0.5rem;
+}
+
+.content-wrapper:not(#intro-content-wrapper) p {
+    font-size: 0.7rem;
+}
+
+#intro-content-wrapper p {
     font-size: 0.8rem;
 }
 
@@ -180,7 +194,6 @@ button {
     background-color: #1a237e;
     border: none;
     color: white;
-    padding: 15px 35px;
     font-size: 1.1em;
     cursor: pointer;
     border-radius: 8px;
@@ -190,8 +203,46 @@ button {
     letter-spacing: 0.5px;
 }
 
-button:hover {
+#start-btn-container button {
+    padding: 15px 35px;
+
+}
+
+.restart-buttons button {
+    border-radius: 8px;
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.slide-buttons button {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0;
+    background-color: #5c6bc0;
+}
+
+.slide-buttons button:first-child {
+    border-radius: 8px 0 0 8px;
+    background-color: #1a237e;
+}
+
+.slide-buttons button:last-child {
+    border-radius: 0 8px 8px 0;
+    background-color: #1a237e;
+}
+
+#start-btn-container button:hover,
+.restart-buttons button:hover,
+.slide-buttons button:last-child:hover,
+.slide-buttons button:first-child:hover {
     background-color: #007acc;
+}
+
+.slide-buttons button:hover {
+    background-color: #3f51b5;
+}
+
+button:hover {
     transform: translateY(-2px);
 }
 
@@ -200,7 +251,7 @@ button:active {
 }
 
 button:disabled {
-    background-color: #aeb6bf;
+    background-color: #aeb6bf !important;
     cursor: not-allowed;
     transform: none;
 }
@@ -240,13 +291,13 @@ button:disabled {
     overflow-y: auto;
     overflow-x: hidden;
     max-height: calc(100% - 30px);
-    min-width: 280px;
-    max-width: 280px;
+    min-width: 110px;
+    max-width: 110px;
     background: #fafafa;
     border: 1px solid #ccc;
     border-radius: 5px;
-    font-size: 14px;
-    font-family: sans-serif;
+    font-size: 0.7rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
     user-select: none;
 }
@@ -302,7 +353,7 @@ button:disabled {
 
 #controls>div {
     display: flex;
-    gap: 15px;
+    gap: 3px;
 }
 
 #page-footer {
@@ -344,11 +395,20 @@ button:disabled {
 .info-footer-sources {
     padding-inline-start: 1rem;
     list-style-type: square;
+    font-size: 0.7rem;
+    margin: 0;
 }
 
 .animated-map-path {
     transform-origin: center;
     transform-box: fill-box;
+}
+
+.animated-map-path.hovered {
+    opacity: 1;
+}
+
+.animated-map-path:not(.hovered) {
     opacity: 0;
     animation-delay: 1s;
     animation: mapPopIn 0.6s ease-out forwards;
