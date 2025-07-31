@@ -1,3 +1,19 @@
+window.requestIdleCallback = window.requestIdleCallback || function (cb, options) {
+    const start = Date.now();
+    return setTimeout(function () {
+        cb({
+            didTimeout: false,
+            timeRemaining: function () {
+                return Math.max(0, 50 - (Date.now() - start));
+            }
+        });
+    }, options?.timeout || 1);
+};
+
+window.cancelIdleCallback = window.cancelIdleCallback || function (id) {
+    clearTimeout(id);
+};
+
 function insertTitleAndDescription(container, title, textHtml) {
     const parent = d3.select(container.node().parentNode);
     parent.selectAll(".info-wrapper").remove();
